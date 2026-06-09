@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printable RPG - Editor A4</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <aside class="sidebar" aria-label="Explorador de bloques">
+        <header class="sidebar-header">
+          <p class="eyebrow">Printable RPG</p>
+          <h1>Editor A4</h1>
+        </header>
+
+        <section class="panel">
+          <div class="panel-title-row">
+            <h2>Explorador</h2>
+            <button id="clearSheetButton" class="ghost-button" type="button">Limpiar</button>
+          </div>
+          <div class="tree-root">
+            <div class="tree-node root-node">▾ Hoja A4</div>
+            <ol id="blockList" class="block-list" aria-label="Bloques de la hoja"></ol>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Crear bloque</h2>
+          <div class="button-grid">
+            <button class="tool-button" type="button" data-template="heading">Título</button>
+            <button class="tool-button" type="button" data-template="text">Texto</button>
+            <button class="tool-button" type="button" data-template="table">Tabla</button>
+            <button class="tool-button" type="button" data-template="stat">Stat block</button>
+          </div>
+        </section>
+
+        <section class="panel inspector-panel">
+          <h2>Inspector</h2>
+          <form id="inspectorForm" class="inspector-form">
+            <label>
+              Nombre
+              <input id="blockNameInput" name="name" type="text" autocomplete="off" />
+            </label>
+
+            <div class="number-grid">
+              <label>
+                X mm
+                <input id="blockXInput" name="x" type="number" min="0" max="210" step="5" />
+              </label>
+              <label>
+                Y mm
+                <input id="blockYInput" name="y" type="number" min="0" max="297" step="5" />
+              </label>
+              <label>
+                Ancho mm
+                <input id="blockWidthInput" name="width" type="number" min="5" max="210" step="5" />
+              </label>
+              <label>
+                Alto mm
+                <input id="blockHeightInput" name="height" type="number" min="5" max="297" step="5" />
+              </label>
+            </div>
+
+            <label>
+              Texto
+              <textarea id="blockTextInput" name="text" rows="6"></textarea>
+            </label>
+
+            <div class="inspector-actions">
+              <button id="duplicateBlockButton" class="ghost-button" type="button">Duplicar</button>
+              <button id="deleteBlockButton" class="danger-button" type="button">Eliminar</button>
+            </div>
+          </form>
+          <p id="emptyInspectorMessage" class="muted-message">Seleccioná un bloque para editar sus medidas y contenido.</p>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="toolbar">
+          <div>
+            <p class="eyebrow">Lienzo imprimible</p>
+            <h2>Hoja A4 · grilla 5 mm × 5 mm</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="zoomOutButton" class="ghost-button" type="button">−</button>
+            <output id="zoomOutput" aria-live="polite">100%</output>
+            <button id="zoomInButton" class="ghost-button" type="button">+</button>
+            <button id="resetZoomButton" class="ghost-button" type="button">Reset</button>
+          </div>
+        </header>
+
+        <section class="canvas-stage" aria-label="Área de edición">
+          <div id="paper" class="paper" role="application" aria-label="Hoja A4 editable"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
