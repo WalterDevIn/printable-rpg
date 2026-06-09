@@ -26,12 +26,13 @@
         </section>
 
         <section class="panel">
-          <h2>Crear bloque</h2>
+          <h2>Crear elemento</h2>
           <div class="button-grid">
-            <button class="tool-button" type="button" data-template="heading">Título</button>
-            <button class="tool-button" type="button" data-template="text">Texto</button>
-            <button class="tool-button" type="button" data-template="table">Tabla</button>
-            <button class="tool-button" type="button" data-template="stat">Stat block</button>
+            <button class="tool-button" type="button" data-template="centeredText">Texto centrado</button>
+            <button class="tool-button" type="button" data-template="commonText">Texto común</button>
+            <button class="tool-button" type="button" data-template="dividerLine">Línea divisoria</button>
+            <button class="tool-button" type="button" data-template="square">Cuadrado</button>
+            <button class="tool-button wide-button" type="button" data-template="gridSquare">Cuadrado con grilla</button>
           </div>
         </section>
 
@@ -46,33 +47,66 @@
             <div class="number-grid">
               <label>
                 X mm
-                <input id="blockXInput" name="x" type="number" min="0" max="210" step="5" />
+                <input id="blockXInput" name="x" type="number" min="0" max="210" step="2.5" />
               </label>
               <label>
                 Y mm
-                <input id="blockYInput" name="y" type="number" min="0" max="297" step="5" />
+                <input id="blockYInput" name="y" type="number" min="0" max="297" step="2.5" />
               </label>
               <label>
                 Ancho mm
-                <input id="blockWidthInput" name="width" type="number" min="5" max="210" step="5" />
+                <input id="blockWidthInput" name="width" type="number" min="0.5" max="210" step="2.5" />
               </label>
               <label>
                 Alto mm
-                <input id="blockHeightInput" name="height" type="number" min="5" max="297" step="5" />
+                <input id="blockHeightInput" name="height" type="number" min="0.5" max="297" step="2.5" />
+              </label>
+            </div>
+
+            <div class="number-grid">
+              <label>
+                Tamaño texto mm
+                <input id="fontSizeInput" name="fontSize" type="number" min="1" max="20" step="0.5" />
+              </label>
+              <label>
+                Color texto/línea
+                <input id="textColorInput" name="textColor" type="color" />
               </label>
             </div>
 
             <label>
               Texto
-              <textarea id="blockTextInput" name="text" rows="6"></textarea>
+              <textarea id="blockTextInput" name="text" rows="5"></textarea>
             </label>
+
+            <label>
+              Orientación de línea
+              <select id="orientationInput" name="orientation">
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+              </select>
+            </label>
+
+            <div class="number-grid">
+              <label>
+                Color grilla
+                <input id="gridColorInput" name="gridColor" type="color" />
+              </label>
+              <label>
+                Borde
+                <select id="borderEnabledInput" name="borderEnabled">
+                  <option value="true">Sí</option>
+                  <option value="false">No</option>
+                </select>
+              </label>
+            </div>
 
             <div class="inspector-actions">
               <button id="duplicateBlockButton" class="ghost-button" type="button">Duplicar</button>
               <button id="deleteBlockButton" class="danger-button" type="button">Eliminar</button>
             </div>
           </form>
-          <p id="emptyInspectorMessage" class="muted-message">Seleccioná un bloque para editar sus medidas y contenido.</p>
+          <p id="emptyInspectorMessage" class="muted-message">Seleccioná un elemento para editar sus medidas, contenido y colores.</p>
         </section>
       </aside>
 
@@ -83,6 +117,10 @@
             <h2>Hoja A4 · grilla 5 mm × 5 mm</h2>
           </div>
           <div class="toolbar-actions">
+            <label class="inline-toggle">
+              <input id="paperGridToggle" type="checkbox" checked />
+              Ver grilla
+            </label>
             <button id="zoomOutButton" class="ghost-button" type="button">−</button>
             <output id="zoomOutput" aria-live="polite">100%</output>
             <button id="zoomInButton" class="ghost-button" type="button">+</button>
