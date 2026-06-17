@@ -4,35 +4,58 @@ Last updated: 2026-06-17
 
 ## Current direction
 
-Printable RPG is being replanted as a data-driven printable RPG publishing tool.
+Printable RPG is a data-driven printable RPG publishing tool.
 
-The new intended pipeline is:
+The current implemented pipeline is:
 
 ```text
 DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser Print
 ```
 
-The app should remain frontend-first for now. A backend/API is not part of the current foundation.
+The app remains frontend-first. A backend/API is not part of the current foundation.
 
 ## Current repository state
 
-The existing app is a frontend-only A4 visual editor built with HTML, CSS, and JavaScript ESM.
+The previous A4 visual editor prototype has been replaced by the first generated print-preview slice.
 
-It currently provides:
+The current app:
 
-- A4 portrait canvas;
-- optional 5 mm visual grid;
-- manually positioned blocks;
-- block inspector;
-- basic print styling;
-- no build step;
-- no dependencies.
+- is frontend-only;
+- uses HTML, CSS, and JavaScript ESM;
+- has no build step;
+- has no dependencies;
+- opens directly through `index.html`;
+- renders sample spell-card pages generated from JavaScript data.
 
-This is now considered a useful prototype/legacy editor, not the architectural center of the product.
+## Implemented foundation
+
+Implemented task:
+
+```text
+foundation/template-print-pipeline-v1
+```
+
+Closed objective completed:
+
+```text
+JavaScript data objects -> template string with placeholder variables -> fixed-size spell-card PrintBlocks -> A4 PrintDocument -> browser-rendered preview with print support
+```
+
+Implemented behavior:
+
+- sample spell data lives in `src/data/sampleSpells.js`;
+- template placeholder rendering lives under `src/core/template/`;
+- print block and page composition logic lives under `src/core/print/`;
+- the spell-card template lives under `src/templates/spellCard/`;
+- the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
+- DOM rendering lives in `src/render/renderPrintDocument.js`;
+- `src/main.js` is now a thin entry point;
+- `index.html` is now a print-preview shell;
+- `src/styles.css` now contains app, preview, and print styles.
 
 ## Architectural documents
 
-Created documentation foundation:
+Documentation foundation:
 
 - `PROJECT_VISION.md`
 - `ARCHITECTURE.md`
@@ -52,14 +75,16 @@ A backend may be introduced later only if required by persistence, shared librar
 
 ### Core separation
 
-Future implementation should split:
+Current implementation separates:
 
-- pure core engine;
-- templates;
 - data;
-- print jobs;
+- template rendering;
+- print block creation;
+- A4 page composition;
+- print document creation;
 - browser rendering;
-- app UI.
+- print job orchestration;
+- app entrypoint.
 
 ### Cards and grid
 
@@ -69,7 +94,7 @@ Cards only need physical dimensions and pagination rules.
 
 ### 5 mm grid families
 
-The 5 mm grid applies internally to:
+The 5 mm grid applies internally to future:
 
 - character sheets;
 - DM stackblocks;
@@ -90,44 +115,54 @@ Development should use a two-step AI process:
 
 Implementation work should use explicit contracts with allowed files, forbidden files, non-goals, and acceptance criteria.
 
-## Next recommended implementation
+## Current limitations
+
+The current foundation intentionally does not include:
+
+- visual template editor;
+- drag and drop;
+- inspector;
+- persistence;
+- import/export;
+- overflow splitting;
+- continuation cards;
+- advanced color tokens;
+- character sheet generation;
+- stackblocks;
+- NPC templates;
+- random tables;
+- PDF export;
+- backend/API;
+- framework or build tooling.
+
+## Next recommended scope
 
 Task name:
 
 ```text
-foundation/template-print-pipeline-v1
+foundation/card-template-tokens-v1
 ```
 
-Closed objective:
+Possible closed objective:
 
-Create the first minimal printable pipeline:
+Add semantic visual tokens for spell schools while keeping school-specific behavior outside the generic print engine.
 
-```text
-JavaScript data objects -> template string with {{variables}} -> fixed-size card PrintBlocks -> A4 PrintDocument -> browser-rendered preview
-```
+Alternative next scopes:
 
-Recommended first use case:
-
-- sample spell cards generated from a JavaScript array.
-
-Non-goals:
-
-- no visual template editor;
-- no overflow splitting;
-- no character sheet generation;
-- no PDF export;
-- no backend/API.
+- `foundation/card-overflow-detection-scope`
+- `foundation/flow-card-template-scope`
+- `foundation/stackable-block-composer-scope`
 
 ## Known risks
 
-- Expanding the old `src/main.js` instead of introducing the new architecture.
-- Mixing domain-specific logic into generic print composition.
-- Adding backend/API before the print pipeline is proven.
-- Treating template HTML as a full programming language too early.
-- Trying to solve perfect overflow before fixed cards work.
+- Adding domain-specific spell logic into generic print composition.
+- Expanding placeholder syntax into a full template language too early.
+- Adding overflow continuation before simple cards are stable.
+- Reintroducing manual editor behavior into the print-preview foundation.
+- Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Documentation foundation is complete.
+Fase 1 is implemented.
 
-No code implementation has started yet under the new architecture.
+The app now previews generated spell-card A4 pages from sample data.
