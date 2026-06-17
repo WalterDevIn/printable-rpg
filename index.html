@@ -3,134 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Printable RPG - Editor A4</title>
+    <title>Printable RPG - Print Preview</title>
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
     <div id="app" class="app-shell">
-      <aside class="sidebar" aria-label="Explorador de bloques">
-        <header class="sidebar-header">
+      <header class="app-toolbar" aria-label="Controles de impresión">
+        <div>
           <p class="eyebrow">Printable RPG</p>
-          <h1>Editor A4</h1>
-        </header>
+          <h1>Preview imprimible</h1>
+          <p class="toolbar-description">Cartas generadas desde datos JS y una plantilla declarativa.</p>
+        </div>
+        <button id="printButton" class="print-button" type="button">Imprimir</button>
+      </header>
 
-        <section class="panel">
-          <div class="panel-title-row">
-            <h2>Explorador</h2>
-            <button id="clearSheetButton" class="ghost-button" type="button">Limpiar</button>
-          </div>
-          <div class="tree-root">
-            <div class="tree-node root-node">▾ Hoja A4</div>
-            <ol id="blockList" class="block-list" aria-label="Bloques de la hoja"></ol>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h2>Crear elemento</h2>
-          <div class="button-grid">
-            <button class="tool-button" type="button" data-template="centeredText">Texto centrado</button>
-            <button class="tool-button" type="button" data-template="commonText">Texto común</button>
-            <button class="tool-button" type="button" data-template="dividerLine">Línea divisoria</button>
-            <button class="tool-button" type="button" data-template="square">Cuadrado</button>
-            <button class="tool-button wide-button" type="button" data-template="gridSquare">Cuadrado con grilla</button>
-          </div>
-        </section>
-
-        <section class="panel inspector-panel">
-          <h2>Inspector</h2>
-          <form id="inspectorForm" class="inspector-form">
-            <label>
-              Nombre
-              <input id="blockNameInput" name="name" type="text" autocomplete="off" />
-            </label>
-
-            <div class="number-grid">
-              <label>
-                X mm
-                <input id="blockXInput" name="x" type="number" min="0" max="210" step="2.5" />
-              </label>
-              <label>
-                Y mm
-                <input id="blockYInput" name="y" type="number" min="0" max="297" step="2.5" />
-              </label>
-              <label>
-                Ancho mm
-                <input id="blockWidthInput" name="width" type="number" min="0.5" max="210" step="2.5" />
-              </label>
-              <label>
-                Alto mm
-                <input id="blockHeightInput" name="height" type="number" min="0.5" max="297" step="2.5" />
-              </label>
-            </div>
-
-            <div class="number-grid">
-              <label>
-                Tamaño texto mm
-                <input id="fontSizeInput" name="fontSize" type="number" min="1" max="20" step="0.5" />
-              </label>
-              <label>
-                Color texto/línea
-                <input id="textColorInput" name="textColor" type="color" />
-              </label>
-            </div>
-
-            <label>
-              Texto
-              <textarea id="blockTextInput" name="text" rows="5"></textarea>
-            </label>
-
-            <label>
-              Orientación de línea
-              <select id="orientationInput" name="orientation">
-                <option value="horizontal">Horizontal</option>
-                <option value="vertical">Vertical</option>
-              </select>
-            </label>
-
-            <div class="number-grid">
-              <label>
-                Color grilla
-                <input id="gridColorInput" name="gridColor" type="color" />
-              </label>
-              <label>
-                Borde
-                <select id="borderEnabledInput" name="borderEnabled">
-                  <option value="true">Sí</option>
-                  <option value="false">No</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="inspector-actions">
-              <button id="duplicateBlockButton" class="ghost-button" type="button">Duplicar</button>
-              <button id="deleteBlockButton" class="danger-button" type="button">Eliminar</button>
-            </div>
-          </form>
-          <p id="emptyInspectorMessage" class="muted-message">Seleccioná un elemento para editar sus medidas, contenido y colores.</p>
-        </section>
-      </aside>
-
-      <main class="workspace">
-        <header class="toolbar">
-          <div>
-            <p class="eyebrow">Lienzo imprimible</p>
-            <h2>Hoja A4 · grilla 5 mm × 5 mm</h2>
-          </div>
-          <div class="toolbar-actions">
-            <label class="inline-toggle">
-              <input id="paperGridToggle" type="checkbox" checked />
-              Ver grilla
-            </label>
-            <button id="zoomOutButton" class="ghost-button" type="button">−</button>
-            <output id="zoomOutput" aria-live="polite">100%</output>
-            <button id="zoomInButton" class="ghost-button" type="button">+</button>
-            <button id="resetZoomButton" class="ghost-button" type="button">Reset</button>
-          </div>
-        </header>
-
-        <section class="canvas-stage" aria-label="Área de edición">
-          <div id="paper" class="paper" role="application" aria-label="Hoja A4 editable"></div>
-        </section>
+      <main class="preview-stage" aria-label="Vista previa de páginas A4">
+        <div id="printPreview" class="print-preview"></div>
       </main>
     </div>
 
