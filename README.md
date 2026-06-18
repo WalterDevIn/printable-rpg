@@ -10,9 +10,9 @@ DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser P
 
 ## Current app
 
-The current app is a minimal read-only three-view implementation for spell cards: Data, Template, and Preview.
+The current app is a minimal read-only workspace implementation for spell cards with four simultaneous views: Data, Template, Diagnostics, and Print Output.
 
-It renders sample spell data through a reusable card template variant, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated preview.
+It renders sample spell data through a reusable card template variant, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated output.
 
 Spell cards receive semantic visual tokens derived from their spell school. The mapping lives inside the `spellCard` template area, not in the generic print core.
 
@@ -39,6 +39,7 @@ foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
 foundation/three-view-app-shell-v1
+foundation/four-view-resizable-workspace-v1
 ```
 
 Current behavior:
@@ -54,20 +55,24 @@ Current behavior:
 - creates fixed-size spell-card PrintBlocks from template manifest dimensions;
 - arranges cards automatically into A4 pages with the explicit `grid-pack` composer;
 - creates additional A4 pages when needed;
-- renders a browser preview;
+- renders a browser print output;
 - measures rendered PrintBlocks for visual overflow;
-- separates read-only inspection into Data, Template, and Preview tabs;
+- separates read-only inspection into Data, Template, Diagnostics, and Print Output views;
+- each workspace view can be shown or hidden from the top controls;
+- multiple workspace views can be visible at the same time;
+- workspace panels can be resized locally in the browser;
 - Data shows the current enriched job data;
 - Template shows variant metadata, manifest, template HTML, and template CSS;
-- Preview shows PrintDocument summary, Overflow report, and the rendered A4 pages below the tabs;
+- Diagnostics shows PrintDocument summary and Overflow report;
+- Print Output contains the real A4 output used for printing;
 - provides an `Imprimir` button using `window.print()`;
-- hides controls, tabs, diagnostic panels, and overflow marks in print mode.
+- hides controls, workspace panels except Print Output, diagnostic UI, and overflow marks in print mode.
 
 ## Main directories
 
 ```text
 src/app/
-  read-only app shell views, tabs, and inspector utilities
+  read-only workspace views, controls, and inspector utilities
 
 src/data/
   sample content objects
@@ -146,7 +151,7 @@ Overflow detection is browser-side and diagnostic.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> Preview tab Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> Diagnostics view Overflow report
 ```
 
 The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
@@ -167,15 +172,18 @@ data-flow-region="description"
 
 That semantic region is for future overflow policy and continuation work. It does not split text or create additional cards by itself.
 
-## Three-view app shell
+## Four-view workspace
 
-The app shell is read-only and split into three tabs:
+The app shell is read-only and split into four workspace views:
 
 - Data: current enriched job data;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Preview: PrintDocument summary, Overflow report, and generated A4 pages.
+- Diagnostics: PrintDocument summary and Overflow report;
+- Print Output: generated A4 pages used by browser print.
 
-The tabs do not edit data, do not edit templates, do not load files, and do not select variants.
+The workspace buttons show or hide panels independently, so multiple views can be visible at once. Panels can be resized locally in the browser.
+
+The workspace does not edit data, edit templates, load files, select variants, persist layout, or create duplicate panel instances.
 
 ## Documentation
 
