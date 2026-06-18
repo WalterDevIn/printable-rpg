@@ -9,7 +9,7 @@ Printable RPG is a data-driven printable RPG publishing tool.
 The current implemented pipeline is:
 
 ```text
-DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser Print
+DataPack -> Template -> PrintRecord -> PrintBlock -> PageComposer -> PrintDocument -> Browser Print
 ```
 
 The app remains frontend-first. A backend/API is not part of the current foundation.
@@ -28,7 +28,8 @@ The current app:
 - renders sample spell-card pages generated from JavaScript data;
 - applies spell-card visual theme tokens derived from spell school;
 - supports code-selected spell-card template variants;
-- includes a flow-oriented spell-card variant for long text experiments;
+- generates spell-card PrintRecords before PrintBlocks;
+- creates mixed spell-card PrintDocuments with `classic` and `flow` variants when estimated data length requires continuation;
 - measures rendered PrintBlocks for diagnostic overflow;
 - evaluates the declared overflow strategy against the measured overflow report;
 - reports spell-card flow regions and flow candidates by data estimate;
@@ -51,6 +52,7 @@ foundation/three-view-app-shell-v1
 foundation/four-view-resizable-workspace-v1
 foundation/card-overflow-policy-v1
 foundation/template-flow-regions-v1
+foundation/mixed-card-print-document-v1
 ```
 
 Completed behavior:
@@ -60,11 +62,13 @@ Completed behavior:
 - template manifest validation lives in `src/core/template/assertTemplateManifest.js`;
 - shared page sizes live in `src/core/layout/pageSizes.js`;
 - print block creation lives under `src/core/print/`;
+- mixed print document creation lives in `src/core/print/createMixedPrintDocument.js`;
+- mixed print block creation lives in `src/core/print/createMixedPrintBlocks.js`;
 - `composePages.js` is a composer dispatcher, not a universal layout function;
 - fixed card grid composition lives in `src/core/print/composeFixedGridPages.js`;
-- print document creation validates the manifest before creating blocks;
+- mixed card variants are validated for compatible size and composer before document creation;
 - spell-card variants live under `src/templates/spellCard/`;
-- the default spell-card variant is `classic`;
+- the default spell-card base variant is `classic`;
 - additional fixed-size `compact` and `flow` spell-card variants exist;
 - the flow variant declares a semantic description flow region;
 - the flow variant declares `overflow.strategy: "fail"` for diagnostic intent;
@@ -76,15 +80,19 @@ Completed behavior:
 - spell-card styles use CSS custom properties for token application;
 - the local spell-card flow region model lives in `src/templates/spellCard/flowRegions.js`;
 - the flow region report generator lives in `src/templates/spellCard/createSpellCardFlowRegionsReport.js`;
+- spell-card PrintRecord creation lives in `src/templates/spellCard/createSpellCardPrintRecords.js`;
 - the flow region model declares fixed, flow, tail, and decoration regions;
 - the `description` field is the first declared flow region;
 - the `description` flow region references `continuationVariantId: "flow"`;
 - flow region reporting uses data estimation only and does not use DOM measurement;
-- flow region reporting does not modify the generated PrintDocument;
+- PrintRecord creation uses estimated data length only and does not use DOM measurement;
+- single records create one `classic` PrintRecord;
+- flow candidates create a `classic` head record and one or more `flow` continuation records;
+- description splitting avoids cutting in the middle of a word when possible;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
 - `createSpellCardsJob()` accepts a `variantId` option from code and defaults to `classic`;
 - `createSpellCardsJob({ variantId: "flow" })` can select the flow variant from code;
-- `createSpellCardsJob()` returns a traceable job object with variant metadata, themed data, manifest, template HTML, template CSS, and printDocument;
+- `createSpellCardsJob()` returns a traceable job object with variant metadata, themed data, PrintRecords, manifest, template HTML, template CSS, and printDocument;
 - rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
 - rendered PrintBlocks are measured browser-side for visual overflow;
 - overflow measurement lives in `src/render/measurePrintBlockOverflow.js`;
@@ -92,10 +100,10 @@ Completed behavior:
 - overflow policy evaluation reads `manifest.overflow.strategy`;
 - `fail` and `clip` have implemented diagnostic semantics;
 - `shrink`, `blank-extra`, and `continuation-card` are recognized but unresolved;
-- Diagnostics view shows PrintDocument summary, Overflow report, Overflow policy report, and Flow regions report;
+- Data view shows source data and generated PrintRecords;
+- Diagnostics view shows PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
 - the read-only workspace shell lives under `src/app/`;
 - `createWorkspaceView.js` renders toggleable workspace controls and panels;
-- Data view shows current enriched job data;
 - Template view shows variant metadata, manifest, template HTML, and template CSS;
 - Print Output view contains the real `#printPreview` output used for browser print;
 - workspace panels can be shown, hidden, and resized locally in the browser;
@@ -133,13 +141,16 @@ Current implementation separates:
 - template rendering;
 - template-specific context enrichment;
 - template manifest validation;
+- PrintRecord creation;
 - print block creation;
+- mixed print block creation;
 - page composition dispatch;
 - fixed-grid page composition;
 - A4 page size constants;
 - local template variants;
 - template-local flow region modeling;
 - print document creation;
+- mixed print document creation;
 - browser rendering;
 - browser-side overflow measurement;
 - print job orchestration;
@@ -159,6 +170,20 @@ grid-pack
 
 Future composers, such as vertical stack composition for NPCs or DM blocks, should be implemented as separate strategies.
 
+### Mixed spell-card documents
+
+Spell cards now use PrintRecords as an intermediate step:
+
+```text
+data -> spell-card PrintRecords -> mixed PrintBlocks -> PrintDocument
+```
+
+`src/core/print/createMixedPrintDocument.js` is generic to records and variant resolution. It does not know spell-card fields.
+
+`src/templates/spellCard/createSpellCardPrintRecords.js` is spell-card-specific and knows about the `description` flow region.
+
+For v1, mixed documents require all participating variants to share physical size and composer.
+
 ### Overflow detection and policy diagnostics
 
 Overflow detection is diagnostic only.
@@ -169,7 +194,7 @@ The current flow is:
 render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy -> Diagnostics reports
 ```
 
-Overflow detection and policy diagnostics do not resolve content. They do not implement shrink, blank-extra, continuation-card, automatic flow continuation, or print blocking.
+Overflow detection and policy diagnostics do not resolve content by measurement. They do not implement shrink, blank-extra, DOM-measured continuation, automatic flow continuation by layout, or print blocking.
 
 Implemented diagnostic strategies:
 
@@ -193,7 +218,7 @@ The current model declares:
 - a tail region prepared for `higherLevels`;
 - a decoration region for a bottom school mark.
 
-The Flow regions report marks records as `single` or `flow-candidate` using estimated data length only. It does not use DOM measurement, does not split content, does not create continuation cards, and does not change the generated PrintDocument.
+The Flow regions report marks records as `single` or `flow-candidate` using estimated data length only. It does not use DOM measurement.
 
 ### Flow card variant
 
@@ -207,15 +232,15 @@ It marks the long-text description region with:
 data-flow-region="description"
 ```
 
-That semantic region is reserved for future overflow policy and continuation work.
+That semantic region supports estimated continuation work, but the variant does not split text by itself.
 
 ### Read-only workspace views
 
 The app shell separates inspection into four workspace panels:
 
-- Data: current enriched job data;
+- Data: source data and generated PrintRecords;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary, Overflow report, Overflow policy report, and Flow regions report;
+- Diagnostics: PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
 - Print Output: generated A4 pages used by browser print.
 
 Workspace controls show or hide panels independently. Multiple panels can be visible at once. Panels can be resized locally in the browser.
@@ -291,14 +316,13 @@ The current foundation intentionally does not include:
 - persistence;
 - import/export;
 - file loading;
-- overflow resolution;
+- overflow resolution by DOM measurement;
 - content shrink;
 - blank-extra generation;
-- continuation cards;
-- automatic flow continuation;
+- table row splitting;
+- tail-region placement on final continuation only;
 - print blocking from overflow policy;
 - DOM-measured content fragmentation;
-- mixed-template PrintDocument generation;
 - duplicate workspace panel instances;
 - persisted workspace layout;
 - character sheet generation;
@@ -316,12 +340,12 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/mixed-card-print-document-scope
+foundation/phase-3-closeout-scope
 ```
 
 Possible closed objective:
 
-Scope how flow region reports become PrintRecords and then a mixed PrintDocument with classic head cards and flow continuation cards.
+Review Phase 3 behavior and decide whether to close it before moving to DOM-measured fragmentation, table flow, or another template family.
 
 Alternative next scopes:
 
@@ -332,7 +356,6 @@ Alternative next scopes:
 
 - Adding domain-specific spell logic into generic print composition.
 - Expanding placeholder syntax into a full template language too early.
-- Adding overflow continuation before simple cards are stable.
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
 - Turning the read-only workspace shell into an editor without a dedicated scope.
@@ -342,10 +365,11 @@ Alternative next scopes:
 - Treating overflow policy diagnostics as overflow resolution.
 - Treating flow region reports as flow resolution.
 - Treating the flow variant as a flow engine.
+- Treating estimated continuation as DOM-measured layout fitting.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Spell-card flow regions are implemented through `foundation/template-flow-regions-v1`.
+Mixed spell-card PrintDocuments are implemented through `foundation/mixed-card-print-document-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/diagnostics/print-output through read-only toggleable panels, reports rendered block overflow, evaluates the declared overflow strategy, and reports flow candidates without resolving overflow or changing the generated PrintDocument.
+The app previews generated spell-card A4 pages from sample data using the default `classic` base variant, generates PrintRecords, emits `classic` head cards and `flow` continuation cards by data estimate, exposes data/template/diagnostics/print-output through read-only toggleable panels, reports rendered block overflow, and evaluates the declared overflow strategy without DOM-measured overflow resolution.
