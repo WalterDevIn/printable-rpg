@@ -28,6 +28,7 @@ The current app:
 - renders sample spell-card pages generated from JavaScript data;
 - applies spell-card visual theme tokens derived from spell school;
 - supports code-selected spell-card template variants;
+- measures rendered PrintBlocks for diagnostic overflow;
 - shows a non-editable inspector for the active print job.
 
 ## Implemented foundation
@@ -40,6 +41,7 @@ foundation/print-core-boundaries-v1
 foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
+foundation/card-overflow-detection-v1
 ```
 
 Completed behavior:
@@ -64,13 +66,16 @@ Completed behavior:
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
 - `createSpellCardsJob()` accepts a `variantId` option from code and defaults to `classic`;
 - `createSpellCardsJob()` returns a traceable job object with variant metadata, themed data, manifest, template HTML, template CSS, and printDocument;
+- rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
+- rendered PrintBlocks are measured browser-side for visual overflow;
+- overflow measurement lives in `src/render/measurePrintBlockOverflow.js`;
 - the non-editable job inspector lives under `src/app/`;
-- the inspector shows job summary, DataPack, template HTML, manifest, template CSS, and a PrintDocument summary without block HTML duplication;
+- the inspector shows job summary, DataPack, template HTML, manifest, template CSS, PrintDocument summary, and Overflow report;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point that renders preview and inspector;
+- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the inspector;
 - `index.html` is a print-preview shell with an inspector container;
-- `src/styles.css` contains app, inspector, preview, and print styles;
-- the inspector is hidden in print mode.
+- `src/styles.css` contains app, inspector, preview, diagnostic overflow, and print styles;
+- the inspector and diagnostic overflow marks are hidden in print mode.
 
 ## Architectural documents
 
@@ -107,6 +112,7 @@ Current implementation separates:
 - local template variants;
 - print document creation;
 - browser rendering;
+- browser-side overflow measurement;
 - print job orchestration;
 - app-level inspection;
 - app entrypoint.
@@ -123,11 +129,23 @@ grid-pack
 
 Future composers, such as vertical stack composition for NPCs or DM blocks, should be implemented as separate strategies.
 
+### Overflow detection
+
+Overflow detection is diagnostic only.
+
+The current flow is:
+
+```text
+render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow report
+```
+
+Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or flow cards.
+
 ### Print job inspection
 
 The inspector is read-only.
 
-It exposes the active job inputs and generated document summary without making them editable.
+It exposes the active job inputs, generated document summary, and overflow report without making them editable.
 
 Data and templates remain code-authored modules for now.
 
@@ -199,7 +217,9 @@ The current foundation intentionally does not include:
 - persistence;
 - import/export;
 - file loading;
-- overflow splitting;
+- overflow resolution;
+- content shrink;
+- blank-extra generation;
 - continuation cards;
 - character sheet generation;
 - stackblocks;
@@ -216,16 +236,16 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/card-overflow-detection-scope
+foundation/flow-card-template-scope
 ```
 
 Possible closed objective:
 
-Scope basic overflow detection for fixed and flow-oriented card content without implementing continuation cards prematurely.
+Scope a minimal flow-oriented card template without implementing automatic continuation cards prematurely.
 
 Alternative next scopes:
 
-- `foundation/flow-card-template-scope`
+- `foundation/card-overflow-policy-scope`
 - `foundation/stackable-block-composer-scope`
 
 ## Known risks
@@ -238,10 +258,11 @@ Alternative next scopes:
 - Turning the read-only inspector into an editor without a dedicated scope.
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
+- Treating overflow detection as overflow resolution.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Phase 2 variant support is implemented through `foundation/card-template-variants-v1`.
+Phase 3 detection work is implemented through `foundation/card-overflow-detection-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, and can select the `compact` variant from code without changing the core pipeline.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, and reports rendered block overflow without resolving it automatically.
