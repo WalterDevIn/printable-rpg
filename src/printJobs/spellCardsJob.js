@@ -5,9 +5,9 @@ import { spellCardFlowRegions } from "../templates/spellCard/flowRegions.js";
 import { createSpellCardTemplateContext } from "../templates/spellCard/resolveSpellCardTheme.js";
 import { getSpellCardVariant } from "../templates/spellCard/variants.js";
 
-export function createSpellCardsJob({ variantId } = {}) {
+export function createSpellCardsJob({ spells = sampleSpells, variantId } = {}) {
   const variant = getSpellCardVariant(variantId);
-  const templateData = sampleSpells.map(createSpellCardTemplateContext);
+  const templateData = spells.map(createSpellCardTemplateContext);
   const printRecords = createSpellCardPrintRecords(templateData, spellCardFlowRegions, {
     baseVariantId: variant.id,
     continuationVariantId: variant.continuationVariantId,
@@ -23,6 +23,7 @@ export function createSpellCardsJob({ variantId } = {}) {
     variantId: variant.id,
     variantLabel: variant.label,
     data: templateData,
+    sourceData: spells,
     printRecords,
     manifest: variant.manifest,
     templateHtml: variant.templateHtml,
