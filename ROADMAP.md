@@ -16,7 +16,7 @@ Deliverables:
 - `ROADMAP.md`
 - `PROJECT_STATE.md`
 
-Status: active.
+Status: completed.
 
 ## Phase 1: Minimal template-print pipeline
 
@@ -47,6 +47,8 @@ Non-goals:
 - no PDF export;
 - no API.
 
+Status: completed.
+
 ## Phase 1.5: Print job inspector
 
 Goal: make the current print job transparent without turning the app into an editor.
@@ -73,6 +75,8 @@ Non-goals:
 
 This phase prevents the print pipeline from becoming a black box while keeping programmer-authored files as the source of truth.
 
+Status: completed.
+
 ## Phase 2: Template tokens and card variants
 
 Goal: improve cards without changing the core pipeline.
@@ -89,19 +93,64 @@ Non-goals:
 - no complex expression language;
 - no arbitrary template JavaScript.
 
-## Phase 3: Basic overflow handling
+Status: completed.
 
-Goal: detect content that does not fit and apply declared template strategies.
+## Phase 3: Basic overflow and flow foundation
 
-Initial strategies:
+Goal: establish the overflow and flow architecture for card templates without requiring layout-perfect fragmentation.
 
-- `clip`;
-- `fail`;
-- `shrink`;
-- `blank-extra`;
-- `continuation-card`.
+Phase 3 is now closed.
 
-Start with flow cards before solving every template family.
+Completed capabilities:
+
+- browser-side overflow detection for rendered PrintBlocks;
+- diagnostic overflow policy evaluation from `manifest.overflow.strategy`;
+- implemented diagnostic semantics for `fail` and `clip`;
+- recognized unresolved strategies for `shrink`, `blank-extra`, and `continuation-card`;
+- flow-oriented spell-card variant;
+- spell-card flow region model with fixed, flow, tail, and decoration regions;
+- `description` as the first flow region;
+- flow candidate detection by data estimate, not DOM measurement;
+- PrintRecords as an intermediate representation before PrintBlocks;
+- mixed spell-card PrintDocuments with `classic` head cards and `flow` continuation cards;
+- diagnostics for PrintDocument, PrintRecords, Overflow, Overflow policy, and Flow regions;
+- four-view read-only workspace: Data, Template, Diagnostics, and Print Output.
+
+Current Phase 3 guarantees:
+
+- overflow can be measured after rendering;
+- overflow policy can be evaluated diagnostically;
+- templates can declare candidate flow regions;
+- spell-card data can generate estimated continuation records;
+- a final PrintDocument can mix compatible variants.
+
+Current Phase 3 limits:
+
+- continuation is estimated from data length;
+- continuation is not layout-perfect;
+- DOM measurement is not used to decide text splitting;
+- overflow diagnostics do not block printing;
+- `tail` regions are modeled but not placed only on final continuation cards;
+- table flow and row splitting are not implemented;
+- `shrink` is recognized but not implemented;
+- `blank-extra` is recognized but not implemented;
+- `continuation-card` is recognized diagnostically but not implemented as a generic policy engine.
+
+Explicitly outside Phase 3:
+
+- DOM-measured fragmentation;
+- provisional render / measure / split / re-render loops;
+- table row flow;
+- final tail-region placement;
+- shrink policy execution;
+- blank-extra generation;
+- print blocking from overflow policy;
+- global template registry;
+- template editor;
+- data import UI;
+- other template families.
+
+Status: completed.
 
 ## Phase 3.5: Explicit data input
 
@@ -127,6 +176,8 @@ Non-goals:
 
 This phase converts DataPack input from programmer-authored files into controlled user input while preserving existing templates as stable code modules.
 
+Status: planned.
+
 ## Phase 4: Stackable DM and NPC blocks
 
 Goal: support table-facing blocks printed sequentially.
@@ -141,6 +192,28 @@ Deliverables:
 
 These templates should use the 5 mm grid internally.
 
+Status: planned.
+
+## Possible future phase: DOM-measured fragmentation
+
+Goal: make continuation cards layout-aware instead of only data-estimated.
+
+Potential deliverables:
+
+- provisional render;
+- browser-side measurement loop;
+- content split based on actual rendered height;
+- final render validation;
+- loop guards and unresolved overflow diagnostics.
+
+Non-goals until separately scoped:
+
+- table row flow;
+- arbitrary template editor;
+- server-side PDF rendering.
+
+Status: backlog.
+
 ## Phase 5: Random table templates
 
 Goal: support random-table output as both pages and stackable blocks.
@@ -153,6 +226,8 @@ Deliverables:
 - print examples.
 
 These templates should use the 5 mm grid internally.
+
+Status: planned.
 
 ## Phase 6: Character sheet generation
 
@@ -169,6 +244,8 @@ Deliverables:
 
 These templates should use the 5 mm grid internally.
 
+Status: planned.
+
 ## Phase 7: Visual template editor revisit
 
 Goal: evolve the current visual editor into a template editor, not a final-document editor.
@@ -182,6 +259,8 @@ Potential deliverables:
 - 5 mm grid authoring for applicable template families.
 
 This phase should happen only after the print pipeline is stable.
+
+Status: planned.
 
 ## Phase 8: Optional backend/API
 
@@ -198,3 +277,5 @@ Possible triggers:
 - collaborative editing.
 
 Until then, frontend-first is preferred.
+
+Status: optional.
