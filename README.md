@@ -18,11 +18,15 @@ Spell cards receive semantic visual tokens derived from their spell school. The 
 
 Spell cards also support code-selected template variants. The default variant is `classic`; additional fixed-size `compact` and `flow` variants exist for denser and long-text-oriented layout experiments.
 
+Phase 3 is closed. It established the overflow and flow foundation: overflow detection, overflow policy diagnostics, flow regions, PrintRecords, and mixed spell-card PrintDocuments.
+
 Rendered PrintBlocks are measured in the browser for overflow after the preview is rendered. The report is diagnostic only: it does not shrink, split, continue, or otherwise resolve content by measurement.
 
-The declared overflow strategy is also evaluated diagnostically against the measured overflow report. This produces an Overflow policy report; it does not block printing or resolve overflow.
+The declared overflow strategy is evaluated diagnostically against the measured overflow report. This produces an Overflow policy report; it does not block printing or resolve overflow.
 
-Spell-card flow regions are modeled locally and reported diagnostically. Flow candidates now generate PrintRecords and a mixed PrintDocument with `classic` head records and `flow` continuation records by data estimate.
+Spell-card flow regions are modeled locally and reported diagnostically. Flow candidates generate PrintRecords and a mixed PrintDocument with `classic` head records and `flow` continuation records by data estimate.
+
+Continuation is estimated from source data. It is not DOM-measured and is not layout-perfect.
 
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
@@ -47,6 +51,7 @@ foundation/four-view-resizable-workspace-v1
 foundation/card-overflow-policy-v1
 foundation/template-flow-regions-v1
 foundation/mixed-card-print-document-v1
+foundation/phase-3-closeout-v1
 ```
 
 Current behavior:
@@ -105,6 +110,36 @@ src/render/
   browser DOM rendering and rendered overflow measurement for print documents
 ```
 
+## Phase 3 closed status
+
+Phase 3 established the overflow and flow architecture for card templates.
+
+Completed in Phase 3:
+
+- browser-side overflow detection;
+- diagnostic overflow policy evaluation;
+- `fail` and `clip` diagnostic semantics;
+- recognized unresolved strategies for `shrink`, `blank-extra`, and `continuation-card`;
+- flow-oriented spell-card variant;
+- spell-card flow region model;
+- `description` as the first flow region;
+- flow candidate detection by data estimate;
+- PrintRecords as an intermediate representation;
+- mixed spell-card PrintDocuments with `classic` head cards and `flow` continuation cards;
+- diagnostics for PrintDocument, PrintRecords, Overflow, Overflow policy, and Flow regions;
+- read-only four-view workspace.
+
+Not completed in Phase 3:
+
+- DOM-measured fragmentation;
+- layout-perfect continuation cards;
+- provisional render / measure / split / re-render loops;
+- final tail-region placement;
+- table row flow;
+- shrink policy execution;
+- blank-extra generation;
+- print blocking from overflow policy.
+
 ## Template and print model
 
 The first template family is `spellCard`.
@@ -119,7 +154,7 @@ Cards are not required to follow the internal 5 mm grid. Character sheets, DM st
 
 ## Mixed spell-card documents
 
-Spell cards now use PrintRecords as an intermediate step:
+Spell cards use PrintRecords as an intermediate step:
 
 ```text
 data -> spell-card PrintRecords -> mixed PrintBlocks -> PrintDocument
@@ -278,14 +313,14 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 
 ## Next likely work
 
-Recommended next phase:
+Recommended next step:
 
 ```text
-foundation/phase-3-closeout-scope
+foundation/phase-4-direction-scope
 ```
 
 Possible objective:
 
-Review Phase 3 behavior and decide whether to close it before moving to DOM-measured fragmentation, table flow, or another template family.
+Choose whether Phase 4 should focus on DOM-measured fragmentation, another template family, controlled data input, or workspace evolution.
 
 Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
