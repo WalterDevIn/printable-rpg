@@ -7,8 +7,14 @@ import { compactSpellCardStyles } from "./compact/styles.js";
 import { flowSpellCardManifest } from "./flow/manifest.js";
 import { flowSpellCardTemplate } from "./flow/template.js";
 import { flowSpellCardStyles } from "./flow/styles.js";
+import { ornateSpellCardManifest } from "./ornate/manifest.js";
+import { ornateSpellCardTemplate } from "./ornate/template.js";
+import { ornateSpellCardStyles } from "./ornate/styles.js";
+import { ornateFlowSpellCardManifest } from "./ornateFlow/manifest.js";
+import { ornateFlowSpellCardTemplate } from "./ornateFlow/template.js";
+import { ornateFlowSpellCardStyles } from "./ornateFlow/styles.js";
 
-export const DEFAULT_SPELL_CARD_VARIANT_ID = "classic";
+export const DEFAULT_SPELL_CARD_VARIANT_ID = "ornate";
 
 export const spellCardVariants = {
   classic: {
@@ -31,6 +37,21 @@ export const spellCardVariants = {
     manifest: flowSpellCardManifest,
     templateHtml: flowSpellCardTemplate,
     templateStyles: flowSpellCardStyles,
+  },
+  ornate: {
+    id: "ornate",
+    label: "Ornate spell card",
+    continuationVariantId: "ornate-flow",
+    manifest: ornateSpellCardManifest,
+    templateHtml: ornateSpellCardTemplate,
+    templateStyles: ornateSpellCardStyles,
+  },
+  "ornate-flow": {
+    id: "ornate-flow",
+    label: "Ornate flow spell card",
+    manifest: ornateFlowSpellCardManifest,
+    templateHtml: ornateFlowSpellCardTemplate,
+    templateStyles: `${ornateSpellCardStyles}\n${ornateFlowSpellCardStyles}`,
   },
 };
 
