@@ -5,10 +5,20 @@ import { spellCardTemplate } from "../templates/spellCard/template.js";
 import { spellCardStyles } from "../templates/spellCard/styles.js";
 
 export function createSpellCardsJob() {
-  return createPrintDocument({
+  const printDocument = createPrintDocument({
     data: sampleSpells,
     manifest: spellCardManifest,
     templateHtml: spellCardTemplate,
     templateStyles: spellCardStyles,
   });
+
+  return {
+    id: "spell-cards",
+    name: "Spell Cards",
+    data: sampleSpells,
+    manifest: spellCardManifest,
+    templateHtml: spellCardTemplate,
+    templateStyles: spellCardStyles,
+    printDocument,
+  };
 }
