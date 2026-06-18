@@ -1,5 +1,6 @@
 import { createDataView } from "./app/createDataView.js";
 import { createDiagnosticsView } from "./app/createDiagnosticsView.js";
+import { evaluateOverflowPolicy } from "./app/evaluateOverflowPolicy.js";
 import { createPrintOutputView } from "./app/createPrintOutputView.js";
 import { createTemplateView } from "./app/createTemplateView.js";
 import { createWorkspaceView } from "./app/createWorkspaceView.js";
@@ -15,6 +16,7 @@ const spellCardsJob = createSpellCardsJob();
 
 renderPrintDocument(spellCardsJob.printDocument, previewTarget);
 const overflowReport = measurePrintBlockOverflow(previewTarget);
+const overflowPolicyReport = evaluateOverflowPolicy(spellCardsJob.manifest, overflowReport);
 
 appViewsTarget.append(
   createWorkspaceView([
@@ -31,7 +33,7 @@ appViewsTarget.append(
     {
       id: "diagnostics",
       label: "Diagnostics",
-      content: createDiagnosticsView(spellCardsJob, { overflowReport }),
+      content: createDiagnosticsView(spellCardsJob, { overflowReport, overflowPolicyReport }),
     },
     {
       id: "print-output",
