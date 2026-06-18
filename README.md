@@ -22,6 +22,8 @@ Rendered PrintBlocks are measured in the browser for overflow after the preview 
 
 The declared overflow strategy is also evaluated diagnostically against the measured overflow report. This produces an Overflow policy report; it does not block printing or resolve overflow.
 
+Spell-card flow regions are modeled locally and reported diagnostically. The report identifies fixed, flow, tail, and decoration regions and flags data records that may need a continuation chain later.
+
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
 It has no build step and no dependencies.
@@ -43,6 +45,7 @@ foundation/flow-card-template-v1
 foundation/three-view-app-shell-v1
 foundation/four-view-resizable-workspace-v1
 foundation/card-overflow-policy-v1
+foundation/template-flow-regions-v1
 ```
 
 Current behavior:
@@ -61,13 +64,14 @@ Current behavior:
 - renders a browser print output;
 - measures rendered PrintBlocks for visual overflow;
 - evaluates the declared overflow strategy against the measured overflow report;
+- evaluates spell-card flow regions by data estimate, not DOM measurement;
 - separates read-only inspection into Data, Template, Diagnostics, and Print Output views;
 - each workspace view can be shown or hidden from the top controls;
 - multiple workspace views can be visible at the same time;
 - workspace panels can be resized locally in the browser;
 - Data shows the current enriched job data;
 - Template shows variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics shows PrintDocument summary, Overflow report, and Overflow policy report;
+- Diagnostics shows PrintDocument summary, Overflow report, Overflow policy report, and Flow regions report;
 - Print Output contains the real A4 output used for printing;
 - provides an `Imprimir` button using `window.print()`;
 - hides controls, workspace panels except Print Output, diagnostic UI, and overflow marks in print mode.
@@ -91,7 +95,7 @@ src/core/print/
   print blocks, page composition dispatch, fixed-grid composition, and print document creation
 
 src/templates/
-  reusable physical templates, local variants, and template-specific theme logic
+  reusable physical templates, local variants, template-specific theme logic, and spell-card flow region model
 
 src/printJobs/
   concrete print requests and traceable job objects
@@ -177,6 +181,25 @@ Unknown or absent strategies produce an explicit diagnostic status.
 
 Overflow policy diagnostics do not resolve overflow. They do not implement shrink, blank-extra, continuation-card, automatic flow continuation, or print blocking.
 
+## Spell-card flow regions
+
+The spell-card template family has a local flow region model:
+
+```text
+src/templates/spellCard/flowRegions.js
+```
+
+The current model declares:
+
+- fixed regions for title and metadata;
+- a flow region for `description`;
+- a tail region prepared for `higherLevels`;
+- a decoration region for a bottom school mark.
+
+The `description` flow region references `continuationVariantId: "flow"` and uses estimated character capacity for diagnostics.
+
+The Flow regions report identifies records as `single` or `flow-candidate` using data estimation only. It does not use DOM measurement, does not change the generated PrintDocument, and does not create continuation cards.
+
 ## Flow card variant
 
 The `flow` spell-card variant is a template variant, not a flow engine.
@@ -197,7 +220,7 @@ The app shell is read-only and split into four workspace views:
 
 - Data: current enriched job data;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary, Overflow report, and Overflow policy report;
+- Diagnostics: PrintDocument summary, Overflow report, Overflow policy report, and Flow regions report;
 - Print Output: generated A4 pages used by browser print.
 
 The workspace buttons show or hide panels independently, so multiple views can be visible at once. Panels can be resized locally in the browser.
@@ -232,11 +255,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/template-flow-regions-scope
+foundation/mixed-card-print-document-scope
 ```
 
 Possible objective:
 
-Scope how templates declare fixed, flow, tail, and decoration regions before implementing automatic continuation cards.
+Scope how flow region reports become PrintRecords and then a mixed PrintDocument with classic head cards and flow continuation cards.
 
 Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
