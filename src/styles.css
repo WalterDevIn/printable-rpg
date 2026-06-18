@@ -65,7 +65,7 @@ h2 {
 }
 
 .toolbar-description,
-.inspector-note {
+.view-note {
   margin: 6px 0 0;
   color: var(--muted);
 }
@@ -82,67 +82,95 @@ h2 {
   border-color: var(--accent);
 }
 
-.inspector-stage {
+.app-views-stage {
   padding: 24px 28px 0;
 }
 
-.print-job-inspector {
+.app-tabs-shell {
   max-width: 1180px;
   margin: 0 auto;
+}
+
+.app-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.app-tab {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
+  color: var(--ink);
+  background: rgba(36, 31, 26, 0.88);
+}
+
+.app-tab:hover,
+.app-tab--active {
+  border-color: var(--accent);
+  background: rgba(112, 76, 32, 0.72);
+}
+
+.app-tab-panels {
+  display: grid;
+}
+
+.app-tab-panel[hidden] {
+  display: none;
+}
+
+.app-tab-panel {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(36, 31, 26, 0.92);
 }
 
-.inspector-header {
+.view-header {
   margin-bottom: 16px;
 }
 
-.inspector-summary-list {
+.view-summary-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   margin: 0 0 18px;
 }
 
-.inspector-summary-list div {
+.view-summary-list div {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(23, 20, 17, 0.62);
 }
 
-.inspector-summary-list dt {
+.view-summary-list dt {
   color: var(--muted);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.inspector-summary-list dd {
+.view-summary-list dd {
   margin: 4px 0 0;
   font-size: 0.95rem;
 }
 
-.inspector-panels {
-  display: grid;
-  gap: 10px;
-}
-
-.inspector-panel {
+.view-panel {
+  margin-top: 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(12, 10, 8, 0.55);
 }
 
-.inspector-panel summary {
+.view-panel h2 {
   padding: 10px 12px;
   color: var(--accent);
-  cursor: pointer;
+  font-size: 1rem;
 }
 
-.inspector-panel pre {
+.view-panel pre {
   max-height: 360px;
   margin: 0;
   padding: 12px;
@@ -197,7 +225,7 @@ h2 {
   }
 
   .app-toolbar,
-  .inspector-stage {
+  .app-views-stage {
     display: none;
   }
 
