@@ -33,6 +33,13 @@ function createRecordId(sourceIndex, role, partIndex) {
   return `spell-${sourceIndex + 1}-${role}-${partIndex + 1}`;
 }
 
+function withPrintPageData(data, partIndex, totalParts) {
+  return {
+    ...data,
+    printPageLabel: `${partIndex + 1}/${totalParts}`,
+  };
+}
+
 function createRecord({ sourceIndex, role, variantId, data, partIndex, totalParts }) {
   return {
     id: createRecordId(sourceIndex, role, partIndex),
@@ -41,7 +48,7 @@ function createRecord({ sourceIndex, role, variantId, data, partIndex, totalPart
     variantId,
     partIndex,
     totalParts,
-    data,
+    data: withPrintPageData(data, partIndex, totalParts),
   };
 }
 
@@ -56,7 +63,7 @@ function createSingleRecord(record, sourceIndex, baseVariantId) {
   });
 }
 
-function createFlowRecords(record, sourceIndex, flowRegion, baseVariantId) {
+function createFlowRecords(record, sourceIndex, flowRegion, baseVariantId, continuationVariantId) {
   const originalText = String(record[flowRegion.field] ?? "");
   const parts = splitFlowText(
     originalText,
@@ -67,7 +74,7 @@ function createFlowRecords(record, sourceIndex, flowRegion, baseVariantId) {
 
   return parts.map((part, partIndex) => {
     const role = partIndex === 0 ? "head" : "continuation";
-    const variantId = partIndex === 0 ? baseVariantId : flowRegion.continuationVariantId;
+    const variantId = partIndex === 0 ? baseVariantId : continuationVariantId;
 
     return createRecord({
       sourceIndex,
@@ -84,8 +91,9 @@ function createFlowRecords(record, sourceIndex, flowRegion, baseVariantId) {
 }
 
 export function createSpellCardPrintRecords(records, flowRegions, options = {}) {
-  const { baseVariantId = "classic" } = options;
+  const { baseVariantId = "classic", continuationVariantId = null } = options;
   const flowRegion = getFlowRegion(flowRegions);
+  const resolvedContinuationVariantId = continuationVariantId ?? flowRegion.continuationVariantId;
 
   return records.flatMap((record, sourceIndex) => {
     const fieldValue = String(record[flowRegion.field] ?? "");
@@ -94,6 +102,6 @@ export function createSpellCardPrintRecords(records, flowRegions, options = {}) 
       return [createSingleRecord(record, sourceIndex, baseVariantId)];
     }
 
-    return createFlowRecords(record, sourceIndex, flowRegion, baseVariantId);
+    return createFlowRecords(record, sourceIndex, flowRegion, baseVariantId, resolvedContinuationVariantId);
   });
 }
