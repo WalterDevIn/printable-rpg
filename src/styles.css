@@ -50,12 +50,21 @@ button {
   text-transform: uppercase;
 }
 
-h1 {
+h1,
+h2 {
   margin: 0;
+}
+
+h1 {
   font-size: 1.8rem;
 }
 
-.toolbar-description {
+h2 {
+  font-size: 1.25rem;
+}
+
+.toolbar-description,
+.inspector-note {
   margin: 6px 0 0;
   color: var(--muted);
 }
@@ -70,6 +79,79 @@ h1 {
 
 .print-button:hover {
   border-color: var(--accent);
+}
+
+.inspector-stage {
+  padding: 24px 28px 0;
+}
+
+.print-job-inspector {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(36, 31, 26, 0.92);
+}
+
+.inspector-header {
+  margin-bottom: 16px;
+}
+
+.inspector-summary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.inspector-summary-list div {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(23, 20, 17, 0.62);
+}
+
+.inspector-summary-list dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inspector-summary-list dd {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.inspector-panels {
+  display: grid;
+  gap: 10px;
+}
+
+.inspector-panel {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(12, 10, 8, 0.55);
+}
+
+.inspector-panel summary {
+  padding: 10px 12px;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.inspector-panel pre {
+  max-height: 360px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  color: #f9f0df;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
 }
 
 .preview-stage {
@@ -105,7 +187,8 @@ h1 {
     background: white;
   }
 
-  .app-toolbar {
+  .app-toolbar,
+  .inspector-stage {
     display: none;
   }
 
