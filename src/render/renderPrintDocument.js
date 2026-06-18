@@ -5,9 +5,12 @@ function createTemplateStyleElement(styles) {
   return style;
 }
 
-function createBlockElement(block) {
+function createBlockElement(block, page) {
   const element = document.createElement("section");
   element.className = "print-block";
+  element.dataset.blockId = block.id;
+  element.dataset.templateId = block.templateId;
+  element.dataset.pageNumber = String(page.number);
   element.style.left = `${block.xMm}mm`;
   element.style.top = `${block.yMm}mm`;
   element.style.width = `${block.widthMm}mm`;
@@ -19,11 +22,12 @@ function createBlockElement(block) {
 function createPageElement(page) {
   const element = document.createElement("section");
   element.className = "print-page";
+  element.dataset.pageNumber = String(page.number);
   element.style.width = `${page.widthMm}mm`;
   element.style.height = `${page.heightMm}mm`;
 
   page.blocks.forEach((block) => {
-    element.append(createBlockElement(block));
+    element.append(createBlockElement(block, page));
   });
 
   return element;
