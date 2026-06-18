@@ -18,6 +18,8 @@ The app remains frontend-first. A backend/API is not part of the current foundat
 
 The previous A4 visual editor prototype has been replaced by the generated print-preview slice.
 
+Phase 3 is closed.
+
 The current app:
 
 - is frontend-only;
@@ -53,6 +55,7 @@ foundation/four-view-resizable-workspace-v1
 foundation/card-overflow-policy-v1
 foundation/template-flow-regions-v1
 foundation/mixed-card-print-document-v1
+foundation/phase-3-closeout-v1
 ```
 
 Completed behavior:
@@ -112,6 +115,36 @@ Completed behavior:
 - `index.html` is a print-preview shell with a workspace container;
 - `src/styles.css` contains app, workspace, view, print output, diagnostic overflow, and print styles;
 - workspace controls, non-print panels, diagnostic UI, and diagnostic overflow marks are hidden in print mode.
+
+## Phase 3 closeout
+
+Phase 3 established the overflow and flow foundation for card templates.
+
+Phase 3 completed:
+
+- overflow detection after render;
+- overflow policy diagnostics;
+- flow-oriented spell-card variant;
+- template-local flow region declarations;
+- data-estimated flow candidates;
+- PrintRecords;
+- mixed PrintDocuments with compatible variants;
+- `classic` head records and `flow` continuation records;
+- read-only diagnostics for generated documents.
+
+Phase 3 intentionally does not include:
+
+- DOM-measured fragmentation;
+- layout-perfect continuation;
+- provisional render / measure / split / re-render loops;
+- final tail-region placement;
+- table flow;
+- row splitting;
+- shrink execution;
+- blank-extra generation;
+- print blocking from overflow policy.
+
+The continuation behavior currently implemented is estimated from source data. It is not DOM-measured and is not guaranteed to fit perfectly.
 
 ## Architectural documents
 
@@ -340,17 +373,18 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/phase-3-closeout-scope
+foundation/phase-4-direction-scope
 ```
 
 Possible closed objective:
 
-Review Phase 3 behavior and decide whether to close it before moving to DOM-measured fragmentation, table flow, or another template family.
+Choose whether Phase 4 should focus on DOM-measured fragmentation, another template family, controlled data input, or workspace evolution.
 
 Alternative next scopes:
 
 - `foundation/workspace-panel-instances-scope`
 - `foundation/stackable-block-composer-scope`
+- `foundation/dom-measured-fragmentation-scope`
 
 ## Known risks
 
@@ -370,6 +404,6 @@ Alternative next scopes:
 
 ## Immediate status
 
-Mixed spell-card PrintDocuments are implemented through `foundation/mixed-card-print-document-v1`.
+Phase 3 is closed through `foundation/phase-3-closeout-v1`.
 
 The app previews generated spell-card A4 pages from sample data using the default `classic` base variant, generates PrintRecords, emits `classic` head cards and `flow` continuation cards by data estimate, exposes data/template/diagnostics/print-output through read-only toggleable panels, reports rendered block overflow, and evaluates the declared overflow strategy without DOM-measured overflow resolution.
