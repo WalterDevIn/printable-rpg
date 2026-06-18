@@ -16,7 +16,7 @@ The app remains frontend-first. A backend/API is not part of the current foundat
 
 ## Current repository state
 
-The previous A4 visual editor prototype has been replaced by the first generated print-preview slice.
+The previous A4 visual editor prototype has been replaced by the generated print-preview slice.
 
 The current app:
 
@@ -25,7 +25,8 @@ The current app:
 - has no build step;
 - has no dependencies;
 - opens directly through `index.html`;
-- renders sample spell-card pages generated from JavaScript data.
+- renders sample spell-card pages generated from JavaScript data;
+- shows a non-editable inspector for the active print job.
 
 ## Implemented foundation
 
@@ -34,6 +35,7 @@ Implemented tasks:
 ```text
 foundation/template-print-pipeline-v1
 foundation/print-core-boundaries-v1
+foundation/print-job-inspector-v1
 ```
 
 Completed behavior:
@@ -43,16 +45,20 @@ Completed behavior:
 - template manifest validation lives in `src/core/template/assertTemplateManifest.js`;
 - shared page sizes live in `src/core/layout/pageSizes.js`;
 - print block creation lives under `src/core/print/`;
-- `composePages.js` is now a composer dispatcher, not a universal layout function;
+- `composePages.js` is a composer dispatcher, not a universal layout function;
 - fixed card grid composition lives in `src/core/print/composeFixedGridPages.js`;
 - print document creation validates the manifest before creating blocks;
 - the spell-card template lives under `src/templates/spellCard/`;
 - the spell-card manifest uses the centralized A4 page size;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
-- DOM rendering lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point;
-- `index.html` is a print-preview shell;
-- `src/styles.css` contains app, preview, and print styles.
+- `createSpellCardsJob()` returns a traceable job object with data, manifest, template HTML, template CSS, and printDocument;
+- the non-editable job inspector lives under `src/app/`;
+- the inspector shows job summary, DataPack, template HTML, manifest, template CSS, and a PrintDocument summary without block HTML duplication;
+- DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
+- `src/main.js` is a thin entry point that renders preview and inspector;
+- `index.html` is a print-preview shell with an inspector container;
+- `src/styles.css` contains app, inspector, preview, and print styles;
+- the inspector is hidden in print mode.
 
 ## Architectural documents
 
@@ -88,6 +94,7 @@ Current implementation separates:
 - print document creation;
 - browser rendering;
 - print job orchestration;
+- app-level inspection;
 - app entrypoint.
 
 ### Page composition
@@ -101,6 +108,14 @@ grid-pack
 `grid-pack` is for same-size repeatable blocks, such as fixed spell cards.
 
 Future composers, such as vertical stack composition for NPCs or DM blocks, should be implemented as separate strategies.
+
+### Print job inspection
+
+The inspector is read-only.
+
+It exposes the active job inputs and generated document summary without making them editable.
+
+Data and templates remain code-authored modules for now.
 
 ### Cards and grid
 
@@ -137,9 +152,10 @@ The current foundation intentionally does not include:
 
 - visual template editor;
 - drag and drop;
-- inspector;
+- editable inspector;
 - persistence;
 - import/export;
+- file loading;
 - overflow splitting;
 - continuation cards;
 - advanced color tokens;
@@ -156,16 +172,15 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/print-job-inspector-v1
+foundation/card-template-tokens-v1
 ```
 
 Possible closed objective:
 
-Show the current data, template HTML, manifest, template CSS, page count, block count, and PrintDocument summary without adding editing or input features.
+Add semantic visual tokens for spell schools while keeping school-specific behavior outside the generic print engine.
 
 Alternative next scopes:
 
-- `foundation/card-template-tokens-v1`
 - `foundation/card-overflow-detection-scope`
 - `foundation/flow-card-template-scope`
 - `foundation/stackable-block-composer-scope`
@@ -177,10 +192,11 @@ Alternative next scopes:
 - Adding overflow continuation before simple cards are stable.
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
+- Turning the read-only inspector into an editor without a dedicated scope.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Fase 1 is implemented and the core boundary refactor is complete.
+Fase 1 and Phase 1.5 are implemented.
 
-The app previews generated spell-card A4 pages from sample data using an explicit fixed-grid composer.
+The app previews generated spell-card A4 pages from sample data and exposes the active print job inputs through a read-only inspector.
