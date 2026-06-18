@@ -1,5 +1,8 @@
 export const spellCardTemplate = `
-  <article class="spell-card">
+  <article
+    class="spell-card"
+    style="--card-accent: {{theme.accent}}; --card-surface: {{theme.surface}}; --card-border: {{theme.border}}; --card-ink: {{theme.ink}};"
+  >
     <header class="spell-card__header">
       <p class="spell-card__eyebrow">{{level}} · {{school}}</p>
       <h2 class="spell-card__title">{{name}}</h2>
