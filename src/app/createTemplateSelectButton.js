@@ -1,9 +1,20 @@
-export function createTemplateSelectButton(label = "Spell Cards · Classic") {
-  const button = document.createElement("button");
-  button.className = "template-select-button compact-action";
-  button.type = "button";
-  button.disabled = true;
-  button.title = "Template selection is planned for a later phase.";
-  button.textContent = `${label} ▾`;
-  return button;
+export function createTemplateSelectButton(options = {}) {
+  const { variants = [], currentVariantId, onChange } = options;
+  const select = document.createElement("select");
+  select.className = "template-select-button compact-action";
+  select.title = "Seleccionar plantilla de carta";
+
+  variants.forEach((variant) => {
+    const option = document.createElement("option");
+    option.value = variant.id;
+    option.textContent = variant.label;
+    option.selected = variant.id === currentVariantId;
+    select.append(option);
+  });
+
+  select.addEventListener("change", () => {
+    onChange?.(select.value);
+  });
+
+  return select;
 }
