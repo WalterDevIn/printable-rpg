@@ -1,4 +1,9 @@
-import { createOverflowSummary, createPrintDocumentSummary, formatJson } from "./formatInspectorValue.js";
+import {
+  createOverflowPolicySummary,
+  createOverflowSummary,
+  createPrintDocumentSummary,
+  formatJson,
+} from "./formatInspectorValue.js";
 
 function createCodePanel(title, value) {
   const section = document.createElement("section");
@@ -16,7 +21,7 @@ function createCodePanel(title, value) {
   return section;
 }
 
-function createPreviewSummary(job, overflowReport) {
+function createPreviewSummary(job, overflowReport, overflowPolicyReport) {
   const list = document.createElement("dl");
   list.className = "view-summary-list";
 
@@ -24,6 +29,8 @@ function createPreviewSummary(job, overflowReport) {
     ["Pages", job.printDocument.pages.length],
     ["Blocks", job.printDocument.pages.reduce((total, page) => total + page.blocks.length, 0)],
     ["Overflow", overflowReport ? `${overflowReport.overflowingBlockCount}/${overflowReport.totalBlocks}` : "Not measured"],
+    ["Policy", overflowPolicyReport ? overflowPolicyReport.status : "Not evaluated"],
+    ["Strategy", overflowPolicyReport?.strategy ?? "none"],
     ["Page", `${job.printDocument.page.size} ${job.printDocument.page.orientation} · ${job.printDocument.page.widthMm}×${job.printDocument.page.heightMm} mm`],
     ["Block size", `${job.manifest.size.widthMm}×${job.manifest.size.heightMm} mm`],
   ];
@@ -44,7 +51,7 @@ function createPreviewSummary(job, overflowReport) {
 }
 
 export function createPreviewInfoView(job, options = {}) {
-  const { overflowReport = null } = options;
+  const { overflowReport = null, overflowPolicyReport = null } = options;
   const root = document.createElement("div");
   root.className = "preview-info-view";
 
@@ -53,21 +60,22 @@ export function createPreviewInfoView(job, options = {}) {
 
   const eyebrow = document.createElement("p");
   eyebrow.className = "eyebrow";
-  eyebrow.textContent = "Preview";
+  eyebrow.textContent = "Diagnostics";
 
   const title = document.createElement("h2");
-  title.textContent = "Previa imprimible";
+  title.textContent = "Diagnóstico imprimible";
 
   const note = document.createElement("p");
   note.className = "view-note";
-  note.textContent = "La preview A4 se renderiza debajo. Esta vista resume el documento generado y su diagnóstico de overflow.";
+  note.textContent = "Resumen no editable del documento generado, overflow medido y política declarada.";
 
   header.append(eyebrow, title, note);
   root.append(
     header,
-    createPreviewSummary(job, overflowReport),
+    createPreviewSummary(job, overflowReport, overflowPolicyReport),
     createCodePanel("PrintDocument summary", formatJson(createPrintDocumentSummary(job.printDocument))),
     createCodePanel("Overflow report", formatJson(createOverflowSummary(overflowReport))),
+    createCodePanel("Overflow policy report", formatJson(createOverflowPolicySummary(overflowPolicyReport))),
   );
 
   return root;
