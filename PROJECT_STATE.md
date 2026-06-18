@@ -30,7 +30,7 @@ The current app:
 - supports code-selected spell-card template variants;
 - includes a flow-oriented spell-card variant for long text experiments;
 - measures rendered PrintBlocks for diagnostic overflow;
-- shows a non-editable inspector for the active print job.
+- separates read-only inspection into Data, Template, and Preview tabs.
 
 ## Implemented foundation
 
@@ -44,6 +44,7 @@ foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
+foundation/three-view-app-shell-v1
 ```
 
 Completed behavior:
@@ -74,13 +75,16 @@ Completed behavior:
 - rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
 - rendered PrintBlocks are measured browser-side for visual overflow;
 - overflow measurement lives in `src/render/measurePrintBlockOverflow.js`;
-- the non-editable job inspector lives under `src/app/`;
-- the inspector shows job summary, DataPack, template HTML, manifest, template CSS, PrintDocument summary, and Overflow report;
+- the read-only app shell lives under `src/app/`;
+- `createAppTabs.js` renders the Data, Template, and Preview tabs;
+- Data view shows current enriched job data;
+- Template view shows variant metadata, manifest, template HTML, and template CSS;
+- Preview view shows PrintDocument summary and Overflow report;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the inspector;
-- `index.html` is a print-preview shell with an inspector container;
-- `src/styles.css` contains app, inspector, preview, diagnostic overflow, and print styles;
-- the inspector and diagnostic overflow marks are hidden in print mode.
+- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the app tabs;
+- `index.html` is a print-preview shell with tab and preview containers;
+- `src/styles.css` contains app, tab, view, preview, diagnostic overflow, and print styles;
+- the app tabs, diagnostic panels, and diagnostic overflow marks are hidden in print mode.
 
 ## Architectural documents
 
@@ -119,7 +123,7 @@ Current implementation separates:
 - browser rendering;
 - browser-side overflow measurement;
 - print job orchestration;
-- app-level inspection;
+- read-only app shell views;
 - app entrypoint.
 
 ### Page composition
@@ -141,7 +145,7 @@ Overflow detection is diagnostic only.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> Preview tab Overflow report
 ```
 
 Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
@@ -160,13 +164,15 @@ data-flow-region="description"
 
 That semantic region is reserved for future overflow policy and continuation work.
 
-### Print job inspection
+### Read-only app views
 
-The inspector is read-only.
+The app shell separates inspection into three tabs:
 
-It exposes the active job inputs, generated document summary, and overflow report without making them editable.
+- Data: current enriched job data;
+- Template: active variant metadata, manifest, template HTML, and template CSS;
+- Preview: PrintDocument summary, Overflow report, and generated A4 pages.
 
-Data and templates remain code-authored modules for now.
+The app shell does not edit data, edit templates, load files, select variants, or persist state.
 
 ### Spell-card variants
 
@@ -266,6 +272,7 @@ Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-
 
 Alternative next scopes:
 
+- `foundation/template-flow-regions-scope`
 - `foundation/stackable-block-composer-scope`
 
 ## Known risks
@@ -275,7 +282,7 @@ Alternative next scopes:
 - Adding overflow continuation before simple cards are stable.
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
-- Turning the read-only inspector into an editor without a dedicated scope.
+- Turning the read-only app shell into an editor without a dedicated scope.
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
 - Treating overflow detection as overflow resolution.
@@ -284,6 +291,6 @@ Alternative next scopes:
 
 ## Immediate status
 
-The flow spell-card template variant is implemented through `foundation/flow-card-template-v1`.
+The three-view app shell is implemented through `foundation/three-view-app-shell-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/preview diagnostics through read-only tabs, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
