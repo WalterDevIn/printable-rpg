@@ -1,10 +1,10 @@
-import { createPrintDocumentSummary, formatJson } from "./formatInspectorValue.js";
+import { createOverflowSummary, createPrintDocumentSummary, formatJson } from "./formatInspectorValue.js";
 
 function countBlocks(printDocument) {
   return printDocument.pages.reduce((total, page) => total + page.blocks.length, 0);
 }
 
-function createSummaryList(job) {
+function createSummaryList(job, overflowReport) {
   const list = document.createElement("dl");
   list.className = "inspector-summary-list";
 
@@ -16,6 +16,7 @@ function createSummaryList(job) {
     ["Data objects", job.data.length],
     ["Pages", job.printDocument.pages.length],
     ["Blocks", countBlocks(job.printDocument)],
+    ["Overflow", overflowReport ? `${overflowReport.overflowingBlockCount}/${overflowReport.totalBlocks}` : "Not measured"],
     ["Page", `${job.printDocument.page.size} ${job.printDocument.page.orientation} · ${job.printDocument.page.widthMm}×${job.printDocument.page.heightMm} mm`],
     ["Block size", `${job.manifest.size.widthMm}×${job.manifest.size.heightMm} mm`],
   ];
@@ -51,7 +52,8 @@ function createCodePanel(title, value) {
   return details;
 }
 
-export function createPrintJobInspector(job) {
+export function createPrintJobInspector(job, options = {}) {
+  const { overflowReport = null } = options;
   const root = document.createElement("section");
   root.className = "print-job-inspector";
   root.setAttribute("aria-label", "Inspector del print job actual");
@@ -80,8 +82,9 @@ export function createPrintJobInspector(job) {
     createCodePanel("Manifest", formatJson(job.manifest)),
     createCodePanel("Template CSS", job.templateStyles.trim()),
     createCodePanel("PrintDocument summary", formatJson(createPrintDocumentSummary(job.printDocument))),
+    createCodePanel("Overflow report", formatJson(createOverflowSummary(overflowReport))),
   );
 
-  root.append(header, createSummaryList(job), panels);
+  root.append(header, createSummaryList(job, overflowReport), panels);
   return root;
 }
