@@ -30,6 +30,7 @@ The current app:
 - supports code-selected spell-card template variants;
 - includes a flow-oriented spell-card variant for long text experiments;
 - measures rendered PrintBlocks for diagnostic overflow;
+- evaluates the declared overflow strategy against the measured overflow report;
 - separates read-only inspection into Data, Template, Diagnostics, and Print Output workspace panels;
 - supports showing, hiding, and locally resizing workspace panels.
 
@@ -47,6 +48,7 @@ foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
 foundation/three-view-app-shell-v1
 foundation/four-view-resizable-workspace-v1
+foundation/card-overflow-policy-v1
 ```
 
 Completed behavior:
@@ -77,15 +79,19 @@ Completed behavior:
 - rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
 - rendered PrintBlocks are measured browser-side for visual overflow;
 - overflow measurement lives in `src/render/measurePrintBlockOverflow.js`;
+- overflow policy evaluation lives in `src/app/evaluateOverflowPolicy.js`;
+- overflow policy evaluation reads `manifest.overflow.strategy`;
+- `fail` and `clip` have implemented diagnostic semantics;
+- `shrink`, `blank-extra`, and `continuation-card` are recognized but unresolved;
+- Diagnostics view shows PrintDocument summary, Overflow report, and Overflow policy report;
 - the read-only workspace shell lives under `src/app/`;
 - `createWorkspaceView.js` renders toggleable workspace controls and panels;
 - Data view shows current enriched job data;
 - Template view shows variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics view shows PrintDocument summary and Overflow report;
 - Print Output view contains the real `#printPreview` output used for browser print;
 - workspace panels can be shown, hidden, and resized locally in the browser;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the workspace;
+- `src/main.js` is a thin entry point that renders preview, measures overflow, evaluates overflow policy, and renders the workspace;
 - `index.html` is a print-preview shell with a workspace container;
 - `src/styles.css` contains app, workspace, view, print output, diagnostic overflow, and print styles;
 - workspace controls, non-print panels, diagnostic UI, and diagnostic overflow marks are hidden in print mode.
@@ -127,6 +133,7 @@ Current implementation separates:
 - browser rendering;
 - browser-side overflow measurement;
 - print job orchestration;
+- app-level overflow policy diagnostics;
 - read-only workspace views;
 - app entrypoint.
 
@@ -142,17 +149,28 @@ grid-pack
 
 Future composers, such as vertical stack composition for NPCs or DM blocks, should be implemented as separate strategies.
 
-### Overflow detection
+### Overflow detection and policy diagnostics
 
 Overflow detection is diagnostic only.
 
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> Diagnostics view Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy -> Diagnostics reports
 ```
 
-Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
+Overflow detection and policy diagnostics do not resolve content. They do not implement shrink, blank-extra, continuation-card, automatic flow continuation, or print blocking.
+
+Implemented diagnostic strategies:
+
+- `fail`: overflow produces `error`; no overflow produces `ok`;
+- `clip`: overflow produces `warning`; no overflow produces `ok`.
+
+Recognized but unresolved strategies:
+
+- `shrink`;
+- `blank-extra`;
+- `continuation-card`.
 
 ### Flow card variant
 
@@ -174,7 +192,7 @@ The app shell separates inspection into four workspace panels:
 
 - Data: current enriched job data;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary and Overflow report;
+- Diagnostics: PrintDocument summary, Overflow report, and Overflow policy report;
 - Print Output: generated A4 pages used by browser print.
 
 Workspace controls show or hide panels independently. Multiple panels can be visible at once. Panels can be resized locally in the browser.
@@ -255,6 +273,7 @@ The current foundation intentionally does not include:
 - blank-extra generation;
 - continuation cards;
 - automatic flow continuation;
+- print blocking from overflow policy;
 - duplicate workspace panel instances;
 - persisted workspace layout;
 - character sheet generation;
@@ -272,16 +291,15 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/card-overflow-policy-scope
+foundation/template-flow-regions-scope
 ```
 
 Possible closed objective:
 
-Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-extra`, and `continuation-card` should behave before implementing automatic resolution.
+Scope how templates declare fixed, flow, tail, and decoration regions before implementing automatic continuation cards.
 
 Alternative next scopes:
 
-- `foundation/template-flow-regions-scope`
 - `foundation/workspace-panel-instances-scope`
 - `foundation/stackable-block-composer-scope`
 
@@ -296,11 +314,12 @@ Alternative next scopes:
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
 - Treating overflow detection as overflow resolution.
+- Treating overflow policy diagnostics as overflow resolution.
 - Treating the flow variant as a flow engine.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-The four-view resizable workspace is implemented through `foundation/four-view-resizable-workspace-v1`.
+Overflow policy diagnostics are implemented through `foundation/card-overflow-policy-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/diagnostics/print-output through read-only toggleable panels, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/diagnostics/print-output through read-only toggleable panels, can select the `flow` variant from code, reports rendered block overflow, and evaluates the declared overflow strategy without resolving overflow automatically.
