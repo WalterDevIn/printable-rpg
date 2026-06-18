@@ -2,9 +2,9 @@ import { formatJson } from "./formatInspectorValue.js";
 
 function createCodePanel(title, value) {
   const section = document.createElement("section");
-  section.className = "view-panel";
+  section.className = "input-data-panel";
 
-  const heading = document.createElement("h2");
+  const heading = document.createElement("h3");
   heading.textContent = title;
 
   const pre = document.createElement("pre");
@@ -18,27 +18,12 @@ function createCodePanel(title, value) {
 
 export function createDataView(job) {
   const root = document.createElement("div");
-  root.className = "data-view";
-
-  const header = document.createElement("header");
-  header.className = "view-header";
-
-  const eyebrow = document.createElement("p");
-  eyebrow.className = "eyebrow";
-  eyebrow.textContent = "Data";
-
-  const title = document.createElement("h2");
-  title.textContent = "DataPack actual";
+  root.className = "data-view input-view";
 
   const note = document.createElement("p");
   note.className = "view-note";
-  note.textContent = "Vista no editable de la data enriquecida y los PrintRecords generados.";
+  note.textContent = "Vista temporal no editable. En la siguiente fase este panel recibirá datos del usuario.";
 
-  header.append(eyebrow, title, note);
-  root.append(
-    header,
-    createCodePanel("Source data", formatJson(job.data)),
-    createCodePanel("PrintRecords", formatJson(job.printRecords ?? [])),
-  );
+  root.append(note, createCodePanel("Current JSON input", formatJson(job.data)));
   return root;
 }
