@@ -3,6 +3,7 @@ import {
   createOverflowPolicySummary,
   createOverflowSummary,
   createPrintDocumentSummary,
+  createPrintRecordsSummary,
   formatJson,
 } from "./formatInspectorValue.js";
 
@@ -29,6 +30,7 @@ function createPreviewSummary(job, overflowReport, overflowPolicyReport, flowReg
   const rows = [
     ["Pages", job.printDocument.pages.length],
     ["Blocks", job.printDocument.pages.reduce((total, page) => total + page.blocks.length, 0)],
+    ["Records", job.printRecords?.length ?? "Not generated"],
     ["Overflow", overflowReport ? `${overflowReport.overflowingBlockCount}/${overflowReport.totalBlocks}` : "Not measured"],
     ["Policy", overflowPolicyReport ? overflowPolicyReport.status : "Not evaluated"],
     ["Strategy", overflowPolicyReport?.strategy ?? "none"],
@@ -69,13 +71,14 @@ export function createPreviewInfoView(job, options = {}) {
 
   const note = document.createElement("p");
   note.className = "view-note";
-  note.textContent = "Resumen no editable del documento generado, overflow medido, política declarada y regiones.";
+  note.textContent = "Resumen no editable del documento generado, records, overflow medido, política declarada y regiones.";
 
   header.append(eyebrow, title, note);
   root.append(
     header,
     createPreviewSummary(job, overflowReport, overflowPolicyReport, flowRegionsReport),
     createCodePanel("PrintDocument summary", formatJson(createPrintDocumentSummary(job.printDocument))),
+    createCodePanel("PrintRecords report", formatJson(createPrintRecordsSummary(job.printRecords ?? []))),
     createCodePanel("Overflow report", formatJson(createOverflowSummary(overflowReport))),
     createCodePanel("Overflow policy report", formatJson(createOverflowPolicySummary(overflowPolicyReport))),
     createCodePanel("Flow regions report", formatJson(createFlowRegionsSummary(flowRegionsReport))),
