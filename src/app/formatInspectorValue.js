@@ -9,6 +9,8 @@ export function createPrintDocumentSummary(printDocument) {
     blocks: page.blocks.map((block) => ({
       id: block.id,
       templateId: block.templateId,
+      variantId: block.variantId,
+      blockRole: block.role,
       widthMm: block.widthMm,
       heightMm: block.heightMm,
       xMm: block.xMm,
@@ -18,6 +20,7 @@ export function createPrintDocumentSummary(printDocument) {
 
   return {
     page: printDocument.page,
+    variants: printDocument.variants ?? [],
     pageCount: printDocument.pages.length,
     blockCount: printDocument.pages.reduce((total, page) => total + page.blocks.length, 0),
     pages,
@@ -81,5 +84,34 @@ export function createFlowRegionsSummary(flowRegionsReport) {
     regions: flowRegionsReport.regions,
     summary: flowRegionsReport.summary,
     records: flowRegionsReport.records,
+  };
+}
+
+function countValues(records, key) {
+  const counts = {};
+
+  records.forEach((record) => {
+    const value = record[key] ?? "unknown";
+    counts[value] = (counts[value] ?? 0) + 1;
+  });
+
+  return counts;
+}
+
+export function createPrintRecordsSummary(records = []) {
+  return {
+    totalRecords: records.length,
+    variantCounts: countValues(records, "variantId"),
+    recordRoleCounts: countValues(records, "role"),
+    records: records.map((record) => ({
+      id: record.id,
+      sourceIndex: record.sourceIndex,
+      recordRole: record.role,
+      variantId: record.variantId,
+      partIndex: record.partIndex,
+      totalParts: record.totalParts,
+      name: record.data?.name,
+      descriptionLength: String(record.data?.description ?? "").length,
+    })),
   };
 }
