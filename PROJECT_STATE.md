@@ -26,6 +26,7 @@ The current app:
 - has no dependencies;
 - opens directly through `index.html`;
 - renders sample spell-card pages generated from JavaScript data;
+- applies spell-card visual theme tokens derived from spell school;
 - shows a non-editable inspector for the active print job.
 
 ## Implemented foundation
@@ -36,6 +37,7 @@ Implemented tasks:
 foundation/template-print-pipeline-v1
 foundation/print-core-boundaries-v1
 foundation/print-job-inspector-v1
+foundation/card-template-tokens-v1
 ```
 
 Completed behavior:
@@ -50,8 +52,13 @@ Completed behavior:
 - print document creation validates the manifest before creating blocks;
 - the spell-card template lives under `src/templates/spellCard/`;
 - the spell-card manifest uses the centralized A4 page size;
+- spell-card theme tokens live in `src/templates/spellCard/themeTokens.js`;
+- spell-card theme resolution lives in `src/templates/spellCard/resolveSpellCardTheme.js`;
+- spell-school mapping is template-specific and does not touch `src/core/`;
+- the spell-card template consumes theme tokens through placeholders;
+- spell-card styles use CSS custom properties for token application;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
-- `createSpellCardsJob()` returns a traceable job object with data, manifest, template HTML, template CSS, and printDocument;
+- `createSpellCardsJob()` returns a traceable job object with themed data, manifest, template HTML, template CSS, and printDocument;
 - the non-editable job inspector lives under `src/app/`;
 - the inspector shows job summary, DataPack, template HTML, manifest, template CSS, and a PrintDocument summary without block HTML duplication;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
@@ -86,6 +93,7 @@ Current implementation separates:
 
 - data;
 - template rendering;
+- template-specific context enrichment;
 - template manifest validation;
 - print block creation;
 - page composition dispatch;
@@ -116,6 +124,18 @@ The inspector is read-only.
 It exposes the active job inputs and generated document summary without making them editable.
 
 Data and templates remain code-authored modules for now.
+
+### Spell-card theme tokens
+
+Spell-card visual tokens are resolved in the spell-card template layer.
+
+The current flow is:
+
+```text
+spell.school -> resolveSpellCardTheme -> theme tokens -> template placeholders -> CSS custom properties
+```
+
+Spell-school mapping must not move into `src/core/`.
 
 ### Cards and grid
 
@@ -158,7 +178,6 @@ The current foundation intentionally does not include:
 - file loading;
 - overflow splitting;
 - continuation cards;
-- advanced color tokens;
 - character sheet generation;
 - stackblocks;
 - NPC templates;
@@ -172,12 +191,12 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/card-template-tokens-v1
+foundation/card-template-variants-v1
 ```
 
 Possible closed objective:
 
-Add semantic visual tokens for spell schools while keeping school-specific behavior outside the generic print engine.
+Add support for multiple card template variants from code-authored modules without adding user input, editor UI, overflow, or arbitrary template JavaScript.
 
 Alternative next scopes:
 
@@ -193,10 +212,11 @@ Alternative next scopes:
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
 - Turning the read-only inspector into an editor without a dedicated scope.
+- Moving template-specific theme mapping into `src/core/`.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Fase 1 and Phase 1.5 are implemented.
+Phase 2 token work is partially implemented through `foundation/card-template-tokens-v1`.
 
-The app previews generated spell-card A4 pages from sample data and exposes the active print job inputs through a read-only inspector.
+The app previews generated spell-card A4 pages from sample data, exposes active print job inputs through a read-only inspector, and applies spell-school visual tokens without changing the core pipeline.
