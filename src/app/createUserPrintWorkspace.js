@@ -1,6 +1,14 @@
 import { createInputModeButton } from "./createInputModeButton.js";
 import { createTemplateSelectButton } from "./createTemplateSelectButton.js";
 
+const MIN_INPUT_PERCENT = 24;
+const MAX_INPUT_PERCENT = 68;
+const DEFAULT_INPUT_PERCENT = 38;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function createWorkspaceTopbar({ templateLabel, onPrint }) {
   const topbar = document.createElement("header");
   topbar.className = "user-print-topbar";
@@ -32,16 +40,69 @@ function createWorkspaceTopbar({ templateLabel, onPrint }) {
   return topbar;
 }
 
-function createPanel(title, content, modifier) {
+function createPanel(content, modifier) {
   const panel = document.createElement("section");
   panel.className = `user-workspace-panel ${modifier}`;
-
-  const heading = document.createElement("h2");
-  heading.className = "panel-title";
-  heading.textContent = title;
-
-  panel.append(heading, content);
+  panel.append(content);
   return panel;
+}
+
+function createSplitter(body) {
+  const splitter = document.createElement("div");
+  splitter.className = "workspace-splitter";
+  splitter.setAttribute("role", "separator");
+  splitter.setAttribute("aria-label", "Ajustar ancho de Input y Preview");
+  splitter.setAttribute("aria-orientation", "vertical");
+  splitter.tabIndex = 0;
+
+  let isDragging = false;
+
+  function setInputPercent(clientX) {
+    const bounds = body.getBoundingClientRect();
+    const rawPercent = ((clientX - bounds.left) / bounds.width) * 100;
+    const inputPercent = clamp(rawPercent, MIN_INPUT_PERCENT, MAX_INPUT_PERCENT);
+    body.style.setProperty("--input-panel-width", `${inputPercent}%`);
+  }
+
+  function stopDragging() {
+    isDragging = false;
+    document.body.classList.remove("is-resizing-workspace");
+  }
+
+  splitter.addEventListener("pointerdown", (event) => {
+    isDragging = true;
+    splitter.setPointerCapture(event.pointerId);
+    document.body.classList.add("is-resizing-workspace");
+    setInputPercent(event.clientX);
+  });
+
+  splitter.addEventListener("pointermove", (event) => {
+    if (!isDragging) {
+      return;
+    }
+
+    setInputPercent(event.clientX);
+  });
+
+  splitter.addEventListener("pointerup", stopDragging);
+  splitter.addEventListener("pointercancel", stopDragging);
+
+  splitter.addEventListener("keydown", (event) => {
+    const currentValue = Number.parseFloat(body.style.getPropertyValue("--input-panel-width")) || DEFAULT_INPUT_PERCENT;
+    const step = event.shiftKey ? 8 : 3;
+
+    if (event.key === "ArrowLeft") {
+      body.style.setProperty("--input-panel-width", `${clamp(currentValue - step, MIN_INPUT_PERCENT, MAX_INPUT_PERCENT)}%`);
+      event.preventDefault();
+    }
+
+    if (event.key === "ArrowRight") {
+      body.style.setProperty("--input-panel-width", `${clamp(currentValue + step, MIN_INPUT_PERCENT, MAX_INPUT_PERCENT)}%`);
+      event.preventDefault();
+    }
+  });
+
+  return splitter;
 }
 
 export function createUserPrintWorkspace({ inputView, previewView, templateLabel, onPrint }) {
@@ -50,8 +111,11 @@ export function createUserPrintWorkspace({ inputView, previewView, templateLabel
 
   const body = document.createElement("div");
   body.className = "user-print-body";
-  body.append(createPanel("Input", inputView, "user-workspace-panel--input"));
-  body.append(createPanel("Preview", previewView, "user-workspace-panel--preview"));
+  body.style.setProperty("--input-panel-width", `${DEFAULT_INPUT_PERCENT}%`);
+
+  body.append(createPanel(inputView, "user-workspace-panel--input"));
+  body.append(createSplitter(body));
+  body.append(createPanel(previewView, "user-workspace-panel--preview"));
 
   root.append(createWorkspaceTopbar({ templateLabel, onPrint }), body);
   return root;
