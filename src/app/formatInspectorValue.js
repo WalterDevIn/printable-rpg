@@ -45,3 +45,23 @@ export function createOverflowSummary(overflowReport) {
     })),
   };
 }
+
+export function createOverflowPolicySummary(overflowPolicyReport) {
+  if (!overflowPolicyReport) {
+    return {
+      evaluated: false,
+    };
+  }
+
+  return {
+    evaluated: true,
+    strategy: overflowPolicyReport.strategy,
+    status: overflowPolicyReport.status,
+    message: overflowPolicyReport.message,
+    measured: overflowPolicyReport.measured,
+    totalBlocks: overflowPolicyReport.totalBlocks,
+    overflowingBlockCount: overflowPolicyReport.overflowingBlockCount,
+    hasOverflow: overflowPolicyReport.hasOverflow,
+    overflowingBlocks: overflowPolicyReport.overflowingBlocks,
+  };
+}
