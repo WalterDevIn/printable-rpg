@@ -9,7 +9,7 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function createWorkspaceTopbar({ templateLabel, onPrint }) {
+function createWorkspaceTopbar({ templateVariants, currentVariantId, onTemplateChange, onPrint }) {
   const topbar = document.createElement("header");
   topbar.className = "user-print-topbar";
 
@@ -20,7 +20,15 @@ function createWorkspaceTopbar({ templateLabel, onPrint }) {
   inputLabel.className = "workspace-primary-label";
   inputLabel.textContent = "Input";
 
-  leftGroup.append(inputLabel, createInputModeButton("JSON"), createTemplateSelectButton(templateLabel));
+  leftGroup.append(
+    inputLabel,
+    createInputModeButton("JSON"),
+    createTemplateSelectButton({
+      variants: templateVariants,
+      currentVariantId,
+      onChange: onTemplateChange,
+    }),
+  );
 
   const rightGroup = document.createElement("div");
   rightGroup.className = "topbar-group topbar-group--preview";
@@ -105,7 +113,14 @@ function createSplitter(body) {
   return splitter;
 }
 
-export function createUserPrintWorkspace({ inputView, previewView, templateLabel, onPrint }) {
+export function createUserPrintWorkspace({
+  inputView,
+  previewView,
+  templateVariants,
+  currentVariantId,
+  onTemplateChange,
+  onPrint,
+}) {
   const root = document.createElement("section");
   root.className = "user-print-workspace";
 
@@ -117,6 +132,14 @@ export function createUserPrintWorkspace({ inputView, previewView, templateLabel
   body.append(createSplitter(body));
   body.append(createPanel(previewView, "user-workspace-panel--preview"));
 
-  root.append(createWorkspaceTopbar({ templateLabel, onPrint }), body);
+  root.append(
+    createWorkspaceTopbar({
+      templateVariants,
+      currentVariantId,
+      onTemplateChange,
+      onPrint,
+    }),
+    body,
+  );
   return root;
 }
