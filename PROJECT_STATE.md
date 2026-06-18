@@ -28,6 +28,7 @@ The current app:
 - renders sample spell-card pages generated from JavaScript data;
 - applies spell-card visual theme tokens derived from spell school;
 - supports code-selected spell-card template variants;
+- includes a flow-oriented spell-card variant for long text experiments;
 - measures rendered PrintBlocks for diagnostic overflow;
 - shows a non-editable inspector for the active print job.
 
@@ -42,6 +43,7 @@ foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
+foundation/flow-card-template-v1
 ```
 
 Completed behavior:
@@ -56,7 +58,9 @@ Completed behavior:
 - print document creation validates the manifest before creating blocks;
 - spell-card variants live under `src/templates/spellCard/`;
 - the default spell-card variant is `classic`;
-- an additional fixed-size `compact` spell-card variant exists;
+- additional fixed-size `compact` and `flow` spell-card variants exist;
+- the flow variant declares a semantic description flow region;
+- the flow variant declares `overflow.strategy: "fail"` for diagnostic intent;
 - the local spell-card variant registry lives in `src/templates/spellCard/variants.js`;
 - spell-card theme tokens live in `src/templates/spellCard/themeTokens.js`;
 - spell-card theme resolution lives in `src/templates/spellCard/resolveSpellCardTheme.js`;
@@ -65,6 +69,7 @@ Completed behavior:
 - spell-card styles use CSS custom properties for token application;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
 - `createSpellCardsJob()` accepts a `variantId` option from code and defaults to `classic`;
+- `createSpellCardsJob({ variantId: "flow" })` can select the flow variant from code;
 - `createSpellCardsJob()` returns a traceable job object with variant metadata, themed data, manifest, template HTML, template CSS, and printDocument;
 - rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
 - rendered PrintBlocks are measured browser-side for visual overflow;
@@ -139,7 +144,21 @@ The current flow is:
 render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow report
 ```
 
-Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or flow cards.
+Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
+
+### Flow card variant
+
+The flow spell-card variant is a template variant, not a flow engine.
+
+It keeps the same physical card size, data model, theme token model, and `grid-pack` pagination as the other spell-card variants.
+
+It marks the long-text description region with:
+
+```html
+data-flow-region="description"
+```
+
+That semantic region is reserved for future overflow policy and continuation work.
 
 ### Print job inspection
 
@@ -162,7 +181,8 @@ src/templates/spellCard/variants.js
 Current variants:
 
 - `classic`: default fixed spell-card layout;
-- `compact`: fixed-size denser layout using the same data model.
+- `compact`: fixed-size denser layout using the same data model;
+- `flow`: fixed-size long-text-oriented layout using the same data model.
 
 No global template registry exists yet.
 
@@ -221,6 +241,7 @@ The current foundation intentionally does not include:
 - content shrink;
 - blank-extra generation;
 - continuation cards;
+- automatic flow continuation;
 - character sheet generation;
 - stackblocks;
 - NPC templates;
@@ -236,16 +257,15 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/flow-card-template-scope
+foundation/card-overflow-policy-scope
 ```
 
 Possible closed objective:
 
-Scope a minimal flow-oriented card template without implementing automatic continuation cards prematurely.
+Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-extra`, and `continuation-card` should behave before implementing automatic resolution.
 
 Alternative next scopes:
 
-- `foundation/card-overflow-policy-scope`
 - `foundation/stackable-block-composer-scope`
 
 ## Known risks
@@ -259,10 +279,11 @@ Alternative next scopes:
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
 - Treating overflow detection as overflow resolution.
+- Treating the flow variant as a flow engine.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Phase 3 detection work is implemented through `foundation/card-overflow-detection-v1`.
+The flow spell-card template variant is implemented through `foundation/flow-card-template-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, and reports rendered block overflow without resolving it automatically.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
