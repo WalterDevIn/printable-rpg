@@ -18,6 +18,8 @@ Spell cards receive semantic visual tokens derived from their spell school. The 
 
 Spell cards also support code-selected template variants. The default variant is `classic`; an additional fixed-size `compact` variant exists for denser card layout experiments.
 
+Rendered PrintBlocks are measured in the browser for overflow after the preview is rendered. The report is diagnostic only: it does not shrink, split, continue, or otherwise resolve content.
+
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
 It has no build step and no dependencies.
@@ -34,6 +36,7 @@ foundation/print-core-boundaries-v1
 foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
+foundation/card-overflow-detection-v1
 ```
 
 Current behavior:
@@ -50,10 +53,11 @@ Current behavior:
 - arranges cards automatically into A4 pages with the explicit `grid-pack` composer;
 - creates additional A4 pages when needed;
 - renders a browser preview;
+- measures rendered PrintBlocks for visual overflow;
 - shows a non-editable inspector for the current print job;
-- shows data, template HTML, manifest, template CSS, and PrintDocument summary;
+- shows data, template HTML, manifest, template CSS, PrintDocument summary, and Overflow report;
 - provides an `Imprimir` button using `window.print()`;
-- hides controls and inspector in print mode and prints only the pages.
+- hides controls, inspector, and diagnostic overflow marks in print mode.
 
 ## Main directories
 
@@ -80,7 +84,7 @@ src/printJobs/
   concrete print requests and traceable job objects
 
 src/render/
-  browser DOM rendering for print documents
+  browser DOM rendering and rendered overflow measurement for print documents
 ```
 
 ## Template and print model
@@ -124,6 +128,20 @@ spell.school -> resolveSpellCardTheme -> theme tokens -> template placeholders -
 
 This keeps spell-school logic out of `src/core/`.
 
+## Overflow detection
+
+Overflow detection is browser-side and diagnostic.
+
+The current flow is:
+
+```text
+render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow report
+```
+
+The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
+
+It does not resolve overflow. It does not implement shrink, blank-extra, continuation-card, or flow cards.
+
 ## Inspector model
 
 The inspector is read-only.
@@ -134,7 +152,8 @@ It shows what feeds the current preview:
 - template HTML;
 - template manifest;
 - template CSS;
-- PrintDocument summary.
+- PrintDocument summary;
+- Overflow report.
 
 It does not allow editing, file loading, persistence, import/export, or template authoring.
 
@@ -166,11 +185,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/card-overflow-detection-scope
+foundation/flow-card-template-scope
 ```
 
 Possible objective:
 
-Scope basic overflow detection for fixed and flow-oriented card content without implementing continuation cards prematurely.
+Scope a minimal flow-oriented card template without implementing automatic continuation cards prematurely.
 
 Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
