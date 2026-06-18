@@ -1,3 +1,5 @@
+import { A4_PORTRAIT } from "../../core/layout/pageSizes.js";
+
 export const spellCardManifest = {
   id: "spellCard",
   family: "card",
@@ -14,12 +16,7 @@ export const spellCardManifest = {
     gridMm: null,
   },
 
-  page: {
-    size: "A4",
-    orientation: "portrait",
-    widthMm: 210,
-    heightMm: 297,
-  },
+  page: A4_PORTRAIT,
 
   pagination: {
     stackable: true,
