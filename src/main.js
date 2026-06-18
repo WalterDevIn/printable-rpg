@@ -7,11 +7,13 @@ import { sampleSpells } from "./data/sampleSpells.js";
 import { createSpellCardsJob } from "./printJobs/spellCardsJob.js";
 import { measurePrintBlockOverflow } from "./render/measurePrintBlockOverflow.js";
 import { renderPrintDocument } from "./render/renderPrintDocument.js";
+import { selectableSpellCardVariants } from "./templates/spellCard/variants.js";
 
 const appViewsTarget = document.querySelector("#appViews");
 const previewTarget = document.querySelector("#printPreview");
 
-let currentJob = createSpellCardsJob();
+let currentSpells = sampleSpells;
+let currentJob = createSpellCardsJob({ spells: currentSpells });
 
 function renderCurrentJob() {
   previewTarget.replaceChildren();
@@ -20,7 +22,13 @@ function renderCurrentJob() {
 }
 
 function setSpells(spells) {
-  currentJob = createSpellCardsJob({ spells, variantId: currentJob.variantId });
+  currentSpells = spells;
+  currentJob = createSpellCardsJob({ spells: currentSpells, variantId: currentJob.variantId });
+  renderCurrentJob();
+}
+
+function setTemplateVariant(variantId) {
+  currentJob = createSpellCardsJob({ spells: currentSpells, variantId });
   renderCurrentJob();
 }
 
@@ -53,7 +61,9 @@ appViewsTarget.append(
       onReset: resetJsonInput,
     }),
     previewView: createPrintOutputView(previewTarget),
-    templateLabel: currentJob.name + " · " + currentJob.variantLabel,
+    templateVariants: selectableSpellCardVariants,
+    currentVariantId: currentJob.variantId,
+    onTemplateChange: setTemplateVariant,
     onPrint: () => window.print(),
   }),
 );
