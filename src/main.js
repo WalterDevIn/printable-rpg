@@ -1,51 +1,23 @@
 import { createDataView } from "./app/createDataView.js";
-import { createDiagnosticsView } from "./app/createDiagnosticsView.js";
-import { evaluateOverflowPolicy } from "./app/evaluateOverflowPolicy.js";
 import { createPrintOutputView } from "./app/createPrintOutputView.js";
-import { createTemplateView } from "./app/createTemplateView.js";
-import { createWorkspaceView } from "./app/createWorkspaceView.js";
+import { createUserPrintWorkspace } from "./app/createUserPrintWorkspace.js";
 import { createSpellCardsJob } from "./printJobs/spellCardsJob.js";
 import { measurePrintBlockOverflow } from "./render/measurePrintBlockOverflow.js";
 import { renderPrintDocument } from "./render/renderPrintDocument.js";
-import { createSpellCardFlowRegionsReport } from "./templates/spellCard/createSpellCardFlowRegionsReport.js";
-import { spellCardFlowRegions } from "./templates/spellCard/flowRegions.js";
 
 const appViewsTarget = document.querySelector("#appViews");
 const previewTarget = document.querySelector("#printPreview");
-const printButton = document.querySelector("#printButton");
 
 const spellCardsJob = createSpellCardsJob();
 
 renderPrintDocument(spellCardsJob.printDocument, previewTarget);
-const overflowReport = measurePrintBlockOverflow(previewTarget);
-const overflowPolicyReport = evaluateOverflowPolicy(spellCardsJob.manifest, overflowReport);
-const flowRegionsReport = createSpellCardFlowRegionsReport(spellCardsJob.data, spellCardFlowRegions);
+measurePrintBlockOverflow(previewTarget);
 
 appViewsTarget.append(
-  createWorkspaceView([
-    {
-      id: "data",
-      label: "Data",
-      content: createDataView(spellCardsJob),
-    },
-    {
-      id: "template",
-      label: "Template",
-      content: createTemplateView(spellCardsJob),
-    },
-    {
-      id: "diagnostics",
-      label: "Diagnostics",
-      content: createDiagnosticsView(spellCardsJob, { overflowReport, overflowPolicyReport, flowRegionsReport }),
-    },
-    {
-      id: "print-output",
-      label: "Print Output",
-      content: createPrintOutputView(previewTarget),
-    },
-  ]),
+  createUserPrintWorkspace({
+    inputView: createDataView(spellCardsJob),
+    previewView: createPrintOutputView(previewTarget),
+    templateLabel: `${spellCardsJob.name} · ${spellCardsJob.variantLabel}`,
+    onPrint: () => window.print(),
+  }),
 );
-
-printButton.addEventListener("click", () => {
-  window.print();
-});
