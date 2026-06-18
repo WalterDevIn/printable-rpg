@@ -29,29 +29,30 @@ The current app:
 
 ## Implemented foundation
 
-Implemented task:
+Implemented tasks:
 
 ```text
 foundation/template-print-pipeline-v1
+foundation/print-core-boundaries-v1
 ```
 
-Closed objective completed:
-
-```text
-JavaScript data objects -> template string with placeholder variables -> fixed-size spell-card PrintBlocks -> A4 PrintDocument -> browser-rendered preview with print support
-```
-
-Implemented behavior:
+Completed behavior:
 
 - sample spell data lives in `src/data/sampleSpells.js`;
 - template placeholder rendering lives under `src/core/template/`;
-- print block and page composition logic lives under `src/core/print/`;
+- template manifest validation lives in `src/core/template/assertTemplateManifest.js`;
+- shared page sizes live in `src/core/layout/pageSizes.js`;
+- print block creation lives under `src/core/print/`;
+- `composePages.js` is now a composer dispatcher, not a universal layout function;
+- fixed card grid composition lives in `src/core/print/composeFixedGridPages.js`;
+- print document creation validates the manifest before creating blocks;
 - the spell-card template lives under `src/templates/spellCard/`;
+- the spell-card manifest uses the centralized A4 page size;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
 - DOM rendering lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is now a thin entry point;
-- `index.html` is now a print-preview shell;
-- `src/styles.css` now contains app, preview, and print styles.
+- `src/main.js` is a thin entry point;
+- `index.html` is a print-preview shell;
+- `src/styles.css` contains app, preview, and print styles.
 
 ## Architectural documents
 
@@ -79,12 +80,27 @@ Current implementation separates:
 
 - data;
 - template rendering;
+- template manifest validation;
 - print block creation;
-- A4 page composition;
+- page composition dispatch;
+- fixed-grid page composition;
+- A4 page size constants;
 - print document creation;
 - browser rendering;
 - print job orchestration;
 - app entrypoint.
+
+### Page composition
+
+The current supported composer is:
+
+```text
+grid-pack
+```
+
+`grid-pack` is for same-size repeatable blocks, such as fixed spell cards.
+
+Future composers, such as vertical stack composition for NPCs or DM blocks, should be implemented as separate strategies.
 
 ### Cards and grid
 
@@ -140,15 +156,16 @@ The current foundation intentionally does not include:
 Task name:
 
 ```text
-foundation/card-template-tokens-v1
+foundation/print-job-inspector-v1
 ```
 
 Possible closed objective:
 
-Add semantic visual tokens for spell schools while keeping school-specific behavior outside the generic print engine.
+Show the current data, template HTML, manifest, template CSS, page count, block count, and PrintDocument summary without adding editing or input features.
 
 Alternative next scopes:
 
+- `foundation/card-template-tokens-v1`
 - `foundation/card-overflow-detection-scope`
 - `foundation/flow-card-template-scope`
 - `foundation/stackable-block-composer-scope`
@@ -159,10 +176,11 @@ Alternative next scopes:
 - Expanding placeholder syntax into a full template language too early.
 - Adding overflow continuation before simple cards are stable.
 - Reintroducing manual editor behavior into the print-preview foundation.
+- Treating `grid-pack` as a universal page composer.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Fase 1 is implemented.
+Fase 1 is implemented and the core boundary refactor is complete.
 
-The app now previews generated spell-card A4 pages from sample data.
+The app previews generated spell-card A4 pages from sample data using an explicit fixed-grid composer.
