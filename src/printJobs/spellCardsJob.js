@@ -1,26 +1,27 @@
 import { sampleSpells } from "../data/sampleSpells.js";
 import { createPrintDocument } from "../core/print/createPrintDocument.js";
-import { spellCardManifest } from "../templates/spellCard/manifest.js";
 import { createSpellCardTemplateContext } from "../templates/spellCard/resolveSpellCardTheme.js";
-import { spellCardTemplate } from "../templates/spellCard/template.js";
-import { spellCardStyles } from "../templates/spellCard/styles.js";
+import { getSpellCardVariant } from "../templates/spellCard/variants.js";
 
-export function createSpellCardsJob() {
+export function createSpellCardsJob({ variantId = "classic" } = {}) {
+  const variant = getSpellCardVariant(variantId);
   const templateData = sampleSpells.map(createSpellCardTemplateContext);
   const printDocument = createPrintDocument({
     data: templateData,
-    manifest: spellCardManifest,
-    templateHtml: spellCardTemplate,
-    templateStyles: spellCardStyles,
+    manifest: variant.manifest,
+    templateHtml: variant.templateHtml,
+    templateStyles: variant.templateStyles,
   });
 
   return {
     id: "spell-cards",
     name: "Spell Cards",
+    variantId: variant.id,
+    variantLabel: variant.label,
     data: templateData,
-    manifest: spellCardManifest,
-    templateHtml: spellCardTemplate,
-    templateStyles: spellCardStyles,
+    manifest: variant.manifest,
+    templateHtml: variant.templateHtml,
+    templateStyles: variant.templateStyles,
     printDocument,
   };
 }
