@@ -20,6 +20,8 @@ Spell cards also support code-selected template variants. The default variant is
 
 Rendered PrintBlocks are measured in the browser for overflow after the preview is rendered. The report is diagnostic only: it does not shrink, split, continue, or otherwise resolve content.
 
+The declared overflow strategy is also evaluated diagnostically against the measured overflow report. This produces an Overflow policy report; it does not block printing or resolve overflow.
+
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
 It has no build step and no dependencies.
@@ -40,6 +42,7 @@ foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
 foundation/three-view-app-shell-v1
 foundation/four-view-resizable-workspace-v1
+foundation/card-overflow-policy-v1
 ```
 
 Current behavior:
@@ -57,13 +60,14 @@ Current behavior:
 - creates additional A4 pages when needed;
 - renders a browser print output;
 - measures rendered PrintBlocks for visual overflow;
+- evaluates the declared overflow strategy against the measured overflow report;
 - separates read-only inspection into Data, Template, Diagnostics, and Print Output views;
 - each workspace view can be shown or hidden from the top controls;
 - multiple workspace views can be visible at the same time;
 - workspace panels can be resized locally in the browser;
 - Data shows the current enriched job data;
 - Template shows variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics shows PrintDocument summary and Overflow report;
+- Diagnostics shows PrintDocument summary, Overflow report, and Overflow policy report;
 - Print Output contains the real A4 output used for printing;
 - provides an `Imprimir` button using `window.print()`;
 - hides controls, workspace panels except Print Output, diagnostic UI, and overflow marks in print mode.
@@ -72,7 +76,7 @@ Current behavior:
 
 ```text
 src/app/
-  read-only workspace views, controls, and inspector utilities
+  read-only workspace views, controls, overflow policy diagnostics, and inspector utilities
 
 src/data/
   sample content objects
@@ -144,19 +148,34 @@ spell.school -> resolveSpellCardTheme -> theme tokens -> template placeholders -
 
 This keeps spell-school logic out of `src/core/`.
 
-## Overflow detection
+## Overflow detection and policy diagnostics
 
 Overflow detection is browser-side and diagnostic.
 
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> Diagnostics view Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy -> Diagnostics reports
 ```
 
 The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
 
-It does not resolve overflow. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
+The policy evaluator reads `manifest.overflow.strategy` and produces an Overflow policy report.
+
+Implemented diagnostic strategies:
+
+- `fail`: overflow produces `error`; no overflow produces `ok`;
+- `clip`: overflow produces `warning`; no overflow produces `ok`.
+
+Recognized but unresolved strategies:
+
+- `shrink`;
+- `blank-extra`;
+- `continuation-card`.
+
+Unknown or absent strategies produce an explicit diagnostic status.
+
+Overflow policy diagnostics do not resolve overflow. They do not implement shrink, blank-extra, continuation-card, automatic flow continuation, or print blocking.
 
 ## Flow card variant
 
@@ -178,7 +197,7 @@ The app shell is read-only and split into four workspace views:
 
 - Data: current enriched job data;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary and Overflow report;
+- Diagnostics: PrintDocument summary, Overflow report, and Overflow policy report;
 - Print Output: generated A4 pages used by browser print.
 
 The workspace buttons show or hide panels independently, so multiple views can be visible at once. Panels can be resized locally in the browser.
@@ -213,11 +232,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/card-overflow-policy-scope
+foundation/template-flow-regions-scope
 ```
 
 Possible objective:
 
-Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-extra`, and `continuation-card` should behave before implementing automatic resolution.
+Scope how templates declare fixed, flow, tail, and decoration regions before implementing automatic continuation cards.
 
 Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
