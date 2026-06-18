@@ -65,3 +65,21 @@ export function createOverflowPolicySummary(overflowPolicyReport) {
     overflowingBlocks: overflowPolicyReport.overflowingBlocks,
   };
 }
+
+export function createFlowRegionsSummary(flowRegionsReport) {
+  if (!flowRegionsReport) {
+    return {
+      evaluated: false,
+    };
+  }
+
+  return {
+    evaluated: true,
+    templateFamily: flowRegionsReport.templateFamily,
+    estimated: flowRegionsReport.estimated,
+    usesDomMeasurement: flowRegionsReport.usesDomMeasurement,
+    regions: flowRegionsReport.regions,
+    summary: flowRegionsReport.summary,
+    records: flowRegionsReport.records,
+  };
+}
