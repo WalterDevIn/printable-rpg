@@ -12,9 +12,11 @@ DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser P
 
 The current app is a minimal print-preview implementation for spell cards with a non-editable print job inspector.
 
-It renders sample spell data through a reusable card template, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated preview.
+It renders sample spell data through a reusable card template variant, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated preview.
 
-Spell cards now receive semantic visual tokens derived from their spell school. The mapping lives inside the `spellCard` template area, not in the generic print core.
+Spell cards receive semantic visual tokens derived from their spell school. The mapping lives inside the `spellCard` template area, not in the generic print core.
+
+Spell cards also support code-selected template variants. The default variant is `classic`; an additional fixed-size `compact` variant exists for denser card layout experiments.
 
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
@@ -31,12 +33,16 @@ foundation/template-print-pipeline-v1
 foundation/print-core-boundaries-v1
 foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
+foundation/card-template-variants-v1
 ```
 
 Current behavior:
 
 - loads sample spell objects from `src/data/sampleSpells.js`;
 - enriches spell-card template data with theme tokens derived from `school`;
+- selects a spell-card template variant from code;
+- uses `classic` as the default spell-card variant;
+- provides an additional fixed-size `compact` spell-card variant;
 - renders each spell with a template using placeholder variables;
 - applies visual tokens through CSS custom properties;
 - validates the template manifest before creating print blocks;
@@ -68,7 +74,7 @@ src/core/print/
   print blocks, page composition dispatch, fixed-grid composition, and print document creation
 
 src/templates/
-  reusable physical templates and template-specific theme logic
+  reusable physical templates, local variants, and template-specific theme logic
 
 src/printJobs/
   concrete print requests and traceable job objects
@@ -79,15 +85,32 @@ src/render/
 
 ## Template and print model
 
-The first template is `spellCard`.
+The first template family is `spellCard`.
 
-Its manifest defines physical card size and A4 pagination rules.
+Its variants define physical card size and A4 pagination rules.
 
 The A4 page size is centralized in `src/core/layout/pageSizes.js`.
 
 The current page composition strategy is explicitly `grid-pack`, implemented by `composeFixedGridPages`. Future composers, such as vertical stack composition, should be added as separate strategies instead of expanding fixed-grid logic.
 
 Cards are not required to follow the internal 5 mm grid. Character sheets, DM stackblocks, NPC blocks, and random tables should use the 5 mm grid internally in later phases.
+
+## Spell-card variants
+
+Spell-card variants live under `src/templates/spellCard/`.
+
+Current variants:
+
+- `classic`: the default fixed spell-card layout;
+- `compact`: a fixed-size denser layout using the same data model.
+
+The local registry is:
+
+```text
+src/templates/spellCard/variants.js
+```
+
+`createSpellCardsJob()` accepts a `variantId` from code and defaults to `classic`.
 
 ## Spell-card theme tokens
 
@@ -143,11 +166,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/card-template-variants-v1
+foundation/card-overflow-detection-scope
 ```
 
 Possible objective:
 
-Add support for multiple card template variants from code-authored modules without adding user input, editor UI, overflow, or arbitrary template JavaScript.
+Scope basic overflow detection for fixed and flow-oriented card content without implementing continuation cards prematurely.
 
-Do not add overflow, character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
+Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
