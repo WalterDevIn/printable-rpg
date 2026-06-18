@@ -5,6 +5,7 @@
   --muted: #b8aa91;
   --line: #4c4032;
   --accent: #d99235;
+  --danger: #d95f45;
   --paper: #ffffff;
   font-family: Georgia, "Times New Roman", serif;
 }
@@ -177,6 +178,14 @@ h2 {
   position: absolute;
 }
 
+.print-block--overflow::after {
+  position: absolute;
+  inset: 0;
+  border: 0.8mm dashed var(--danger);
+  content: "";
+  pointer-events: none;
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -213,5 +222,9 @@ h2 {
   .print-page:last-child {
     break-after: auto;
     page-break-after: auto;
+  }
+
+  .print-block--overflow::after {
+    display: none;
   }
 }
