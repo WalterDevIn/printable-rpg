@@ -55,6 +55,13 @@ export const spellCardVariants = {
   },
 };
 
+export const selectableSpellCardVariants = [
+  spellCardVariants.ornate,
+  spellCardVariants.classic,
+  spellCardVariants.compact,
+  spellCardVariants.flow,
+];
+
 export function getSpellCardVariant(variantId = DEFAULT_SPELL_CARD_VARIANT_ID) {
   const variant = spellCardVariants[variantId];
 
