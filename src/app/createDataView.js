@@ -32,9 +32,13 @@ export function createDataView(job) {
 
   const note = document.createElement("p");
   note.className = "view-note";
-  note.textContent = "Vista no editable de la data enriquecida que alimenta el print job.";
+  note.textContent = "Vista no editable de la data enriquecida y los PrintRecords generados.";
 
   header.append(eyebrow, title, note);
-  root.append(header, createCodePanel("Data", formatJson(job.data)));
+  root.append(
+    header,
+    createCodePanel("Source data", formatJson(job.data)),
+    createCodePanel("PrintRecords", formatJson(job.printRecords ?? [])),
+  );
   return root;
 }
