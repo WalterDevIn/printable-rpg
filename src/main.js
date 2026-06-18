@@ -1,6 +1,9 @@
 import { createDataView } from "./app/createDataView.js";
+import { formatJson } from "./app/formatInspectorValue.js";
+import { parseSpellJsonInput } from "./app/parseSpellJsonInput.js";
 import { createPrintOutputView } from "./app/createPrintOutputView.js";
 import { createUserPrintWorkspace } from "./app/createUserPrintWorkspace.js";
+import { sampleSpells } from "./data/sampleSpells.js";
 import { createSpellCardsJob } from "./printJobs/spellCardsJob.js";
 import { measurePrintBlockOverflow } from "./render/measurePrintBlockOverflow.js";
 import { renderPrintDocument } from "./render/renderPrintDocument.js";
@@ -8,16 +11,49 @@ import { renderPrintDocument } from "./render/renderPrintDocument.js";
 const appViewsTarget = document.querySelector("#appViews");
 const previewTarget = document.querySelector("#printPreview");
 
-const spellCardsJob = createSpellCardsJob();
+let currentJob = createSpellCardsJob();
 
-renderPrintDocument(spellCardsJob.printDocument, previewTarget);
-measurePrintBlockOverflow(previewTarget);
+function renderCurrentJob() {
+  previewTarget.replaceChildren();
+  renderPrintDocument(currentJob.printDocument, previewTarget);
+  measurePrintBlockOverflow(previewTarget);
+}
+
+function setSpells(spells) {
+  currentJob = createSpellCardsJob({ spells, variantId: currentJob.variantId });
+  renderCurrentJob();
+}
+
+function applyJsonInput(rawValue) {
+  try {
+    const spells = parseSpellJsonInput(rawValue);
+    setSpells(spells);
+    return { ok: true, message: String(spells.length) + " conjuro(s) aplicados." };
+  } catch (error) {
+    return { ok: false, message: error.message };
+  }
+}
+
+function resetJsonInput() {
+  setSpells(sampleSpells);
+  return {
+    ok: true,
+    message: "Datos de ejemplo restaurados.",
+    value: formatJson(sampleSpells),
+  };
+}
+
+renderCurrentJob();
 
 appViewsTarget.append(
   createUserPrintWorkspace({
-    inputView: createDataView(spellCardsJob),
+    inputView: createDataView({
+      initialSpells: sampleSpells,
+      onApply: applyJsonInput,
+      onReset: resetJsonInput,
+    }),
     previewView: createPrintOutputView(previewTarget),
-    templateLabel: `${spellCardsJob.name} · ${spellCardsJob.variantLabel}`,
+    templateLabel: currentJob.name + " · " + currentJob.variantLabel,
     onPrint: () => window.print(),
   }),
 );
