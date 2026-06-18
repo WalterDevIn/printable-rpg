@@ -30,7 +30,8 @@ The current app:
 - supports code-selected spell-card template variants;
 - includes a flow-oriented spell-card variant for long text experiments;
 - measures rendered PrintBlocks for diagnostic overflow;
-- separates read-only inspection into Data, Template, and Preview tabs.
+- separates read-only inspection into Data, Template, Diagnostics, and Print Output workspace panels;
+- supports showing, hiding, and locally resizing workspace panels.
 
 ## Implemented foundation
 
@@ -45,6 +46,7 @@ foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
 foundation/three-view-app-shell-v1
+foundation/four-view-resizable-workspace-v1
 ```
 
 Completed behavior:
@@ -75,16 +77,18 @@ Completed behavior:
 - rendered PrintBlocks include diagnostic attributes for block id, template id, and page number;
 - rendered PrintBlocks are measured browser-side for visual overflow;
 - overflow measurement lives in `src/render/measurePrintBlockOverflow.js`;
-- the read-only app shell lives under `src/app/`;
-- `createAppTabs.js` renders the Data, Template, and Preview tabs;
+- the read-only workspace shell lives under `src/app/`;
+- `createWorkspaceView.js` renders toggleable workspace controls and panels;
 - Data view shows current enriched job data;
 - Template view shows variant metadata, manifest, template HTML, and template CSS;
-- Preview view shows PrintDocument summary and Overflow report;
+- Diagnostics view shows PrintDocument summary and Overflow report;
+- Print Output view contains the real `#printPreview` output used for browser print;
+- workspace panels can be shown, hidden, and resized locally in the browser;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the app tabs;
-- `index.html` is a print-preview shell with tab and preview containers;
-- `src/styles.css` contains app, tab, view, preview, diagnostic overflow, and print styles;
-- the app tabs, diagnostic panels, and diagnostic overflow marks are hidden in print mode.
+- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the workspace;
+- `index.html` is a print-preview shell with a workspace container;
+- `src/styles.css` contains app, workspace, view, print output, diagnostic overflow, and print styles;
+- workspace controls, non-print panels, diagnostic UI, and diagnostic overflow marks are hidden in print mode.
 
 ## Architectural documents
 
@@ -123,7 +127,7 @@ Current implementation separates:
 - browser rendering;
 - browser-side overflow measurement;
 - print job orchestration;
-- read-only app shell views;
+- read-only workspace views;
 - app entrypoint.
 
 ### Page composition
@@ -145,7 +149,7 @@ Overflow detection is diagnostic only.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> Preview tab Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> Diagnostics view Overflow report
 ```
 
 Overflow detection does not resolve content. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
@@ -164,15 +168,18 @@ data-flow-region="description"
 
 That semantic region is reserved for future overflow policy and continuation work.
 
-### Read-only app views
+### Read-only workspace views
 
-The app shell separates inspection into three tabs:
+The app shell separates inspection into four workspace panels:
 
 - Data: current enriched job data;
 - Template: active variant metadata, manifest, template HTML, and template CSS;
-- Preview: PrintDocument summary, Overflow report, and generated A4 pages.
+- Diagnostics: PrintDocument summary and Overflow report;
+- Print Output: generated A4 pages used by browser print.
 
-The app shell does not edit data, edit templates, load files, select variants, or persist state.
+Workspace controls show or hide panels independently. Multiple panels can be visible at once. Panels can be resized locally in the browser.
+
+The workspace does not edit data, edit templates, load files, select variants, create duplicate panel instances, or persist layout.
 
 ### Spell-card variants
 
@@ -248,6 +255,8 @@ The current foundation intentionally does not include:
 - blank-extra generation;
 - continuation cards;
 - automatic flow continuation;
+- duplicate workspace panel instances;
+- persisted workspace layout;
 - character sheet generation;
 - stackblocks;
 - NPC templates;
@@ -273,6 +282,7 @@ Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-
 Alternative next scopes:
 
 - `foundation/template-flow-regions-scope`
+- `foundation/workspace-panel-instances-scope`
 - `foundation/stackable-block-composer-scope`
 
 ## Known risks
@@ -282,7 +292,7 @@ Alternative next scopes:
 - Adding overflow continuation before simple cards are stable.
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
-- Turning the read-only app shell into an editor without a dedicated scope.
+- Turning the read-only workspace shell into an editor without a dedicated scope.
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
 - Treating overflow detection as overflow resolution.
@@ -291,6 +301,6 @@ Alternative next scopes:
 
 ## Immediate status
 
-The three-view app shell is implemented through `foundation/three-view-app-shell-v1`.
+The four-view resizable workspace is implemented through `foundation/four-view-resizable-workspace-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/preview diagnostics through read-only tabs, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes data/template/diagnostics/print-output through read-only toggleable panels, can select the `flow` variant from code, and reports rendered block overflow without resolving it automatically.
