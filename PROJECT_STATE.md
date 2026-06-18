@@ -34,9 +34,10 @@ The current app:
 - creates mixed spell-card PrintDocuments with `classic` and `flow` variants when estimated data length requires continuation;
 - measures rendered PrintBlocks for diagnostic overflow;
 - evaluates the declared overflow strategy against the measured overflow report;
-- reports spell-card flow regions and flow candidates by data estimate;
-- separates read-only inspection into Data, Template, Diagnostics, and Print Output workspace panels;
-- supports showing, hiding, and locally resizing workspace panels.
+- uses a compact user-facing Input / Preview workspace;
+- keeps template internals out of the primary user workflow;
+- includes disabled placeholders for input mode and template selection;
+- keeps the current input data read-only until explicit data input is implemented.
 
 ## Implemented foundation
 
@@ -56,6 +57,7 @@ foundation/card-overflow-policy-v1
 foundation/template-flow-regions-v1
 foundation/mixed-card-print-document-v1
 foundation/phase-3-closeout-v1
+foundation/user-print-workspace-redesign-v1
 ```
 
 Completed behavior:
@@ -103,18 +105,18 @@ Completed behavior:
 - overflow policy evaluation reads `manifest.overflow.strategy`;
 - `fail` and `clip` have implemented diagnostic semantics;
 - `shrink`, `blank-extra`, and `continuation-card` are recognized but unresolved;
-- Data view shows source data and generated PrintRecords;
-- Diagnostics view shows PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
-- the read-only workspace shell lives under `src/app/`;
-- `createWorkspaceView.js` renders toggleable workspace controls and panels;
-- Template view shows variant metadata, manifest, template HTML, and template CSS;
-- Print Output view contains the real `#printPreview` output used for browser print;
-- workspace panels can be shown, hidden, and resized locally in the browser;
+- the primary user workspace is now Input / Preview, not Data / Template / Diagnostics / Print Output;
+- `createUserPrintWorkspace.js` renders the compact user print workspace;
+- `createInputModeButton.js` renders the disabled input mode placeholder;
+- `createTemplateSelectButton.js` renders the disabled template selection placeholder;
+- Input view shows the current JSON data read-only;
+- Preview contains the real `#printPreview` output used for browser print;
+- template HTML, manifest, CSS, and diagnostics are not part of the primary user workflow;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
-- `src/main.js` is a thin entry point that renders preview, measures overflow, evaluates overflow policy, creates the flow regions report, and renders the workspace;
-- `index.html` is a print-preview shell with a workspace container;
-- `src/styles.css` contains app, workspace, view, print output, diagnostic overflow, and print styles;
-- workspace controls, non-print panels, diagnostic UI, and diagnostic overflow marks are hidden in print mode.
+- `src/main.js` is a thin entry point that renders preview, measures overflow, and renders the user print workspace;
+- `index.html` is a minimal print-preview shell with a workspace container;
+- `src/styles.css` contains the compact Input / Preview workspace, print output, diagnostic overflow, and print styles;
+- input controls and non-print UI are hidden in print mode.
 
 ## Phase 3 closeout
 
@@ -166,6 +168,14 @@ Do not split into API/frontend yet.
 
 A backend may be introduced later only if required by persistence, shared libraries, authentication, collaboration, or server-side PDF rendering.
 
+### User print workspace versus template authoring
+
+The primary print workspace is for users who want to provide input data and get an imprimible.
+
+The template is selected in that workflow; it is not edited or inspected there.
+
+Template code, manifest, CSS, tokens, regions, and technical diagnostics belong in a future Template Studio or debug/inspector mode, not in the primary user workflow.
+
 ### Core separation
 
 Current implementation separates:
@@ -188,7 +198,7 @@ Current implementation separates:
 - browser-side overflow measurement;
 - print job orchestration;
 - app-level overflow policy diagnostics;
-- read-only workspace views;
+- user print workspace views;
 - app entrypoint.
 
 ### Page composition
@@ -224,7 +234,7 @@ Overflow detection is diagnostic only.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy -> Diagnostics reports
+render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy
 ```
 
 Overflow detection and policy diagnostics do not resolve content by measurement. They do not implement shrink, blank-extra, DOM-measured continuation, automatic flow continuation by layout, or print blocking.
@@ -266,19 +276,6 @@ data-flow-region="description"
 ```
 
 That semantic region supports estimated continuation work, but the variant does not split text by itself.
-
-### Read-only workspace views
-
-The app shell separates inspection into four workspace panels:
-
-- Data: source data and generated PrintRecords;
-- Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
-- Print Output: generated A4 pages used by browser print.
-
-Workspace controls show or hide panels independently. Multiple panels can be visible at once. Panels can be resized locally in the browser.
-
-The workspace does not edit data, edit templates, load files, select variants, create duplicate panel instances, or persist layout.
 
 ### Spell-card variants
 
@@ -343,9 +340,12 @@ Implementation work should use explicit contracts with allowed files, forbidden 
 
 The current foundation intentionally does not include:
 
+- editable input data;
+- input mode selection behavior;
+- template selection behavior;
+- Template Studio;
 - visual template editor;
 - drag and drop;
-- editable inspector;
 - persistence;
 - import/export;
 - file loading;
@@ -365,26 +365,25 @@ The current foundation intentionally does not include:
 - PDF export;
 - backend/API;
 - framework or build tooling;
-- global template registry;
-- UI template selector.
+- global template registry.
 
 ## Next recommended scope
 
 Task name:
 
 ```text
-foundation/phase-4-direction-scope
+foundation/explicit-data-input-v1
 ```
 
 Possible closed objective:
 
-Choose whether Phase 4 should focus on DOM-measured fragmentation, another template family, controlled data input, or workspace evolution.
+Turn the left Input panel into a controlled JSON input for the current template family.
 
 Alternative next scopes:
 
-- `foundation/workspace-panel-instances-scope`
-- `foundation/stackable-block-composer-scope`
-- `foundation/dom-measured-fragmentation-scope`
+- `foundation/input-validation-reporting-scope`
+- `foundation/template-selection-scope`
+- `foundation/template-studio-scope`
 
 ## Known risks
 
@@ -392,7 +391,6 @@ Alternative next scopes:
 - Expanding placeholder syntax into a full template language too early.
 - Reintroducing manual editor behavior into the print-preview foundation.
 - Treating `grid-pack` as a universal page composer.
-- Turning the read-only workspace shell into an editor without a dedicated scope.
 - Moving template-specific theme mapping into `src/core/`.
 - Creating a global template registry before there are multiple template families.
 - Treating overflow detection as overflow resolution.
@@ -400,10 +398,11 @@ Alternative next scopes:
 - Treating flow region reports as flow resolution.
 - Treating the flow variant as a flow engine.
 - Treating estimated continuation as DOM-measured layout fitting.
+- Surfacing template internals in the primary user print workflow.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Phase 3 is closed through `foundation/phase-3-closeout-v1`.
+The user-facing print workspace redesign is implemented through `foundation/user-print-workspace-redesign-v1`.
 
-The app previews generated spell-card A4 pages from sample data using the default `classic` base variant, generates PrintRecords, emits `classic` head cards and `flow` continuation cards by data estimate, exposes data/template/diagnostics/print-output through read-only toggleable panels, reports rendered block overflow, and evaluates the declared overflow strategy without DOM-measured overflow resolution.
+The app previews generated spell-card A4 pages from sample data using the default `classic` base variant, generates PrintRecords, emits `classic` head cards and `flow` continuation cards by data estimate, exposes a compact Input / Preview workflow, reports rendered overflow internally, and prints only the generated A4 output.
