@@ -16,7 +16,7 @@ It renders sample spell data through a reusable card template variant, creates f
 
 Spell cards receive semantic visual tokens derived from their spell school. The mapping lives inside the `spellCard` template area, not in the generic print core.
 
-Spell cards also support code-selected template variants. The default variant is `classic`; an additional fixed-size `compact` variant exists for denser card layout experiments.
+Spell cards also support code-selected template variants. The default variant is `classic`; additional fixed-size `compact` and `flow` variants exist for denser and long-text-oriented layout experiments.
 
 Rendered PrintBlocks are measured in the browser for overflow after the preview is rendered. The report is diagnostic only: it does not shrink, split, continue, or otherwise resolve content.
 
@@ -37,6 +37,7 @@ foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
+foundation/flow-card-template-v1
 ```
 
 Current behavior:
@@ -45,7 +46,7 @@ Current behavior:
 - enriches spell-card template data with theme tokens derived from `school`;
 - selects a spell-card template variant from code;
 - uses `classic` as the default spell-card variant;
-- provides an additional fixed-size `compact` spell-card variant;
+- provides fixed-size `compact` and `flow` spell-card variants;
 - renders each spell with a template using placeholder variables;
 - applies visual tokens through CSS custom properties;
 - validates the template manifest before creating print blocks;
@@ -106,7 +107,8 @@ Spell-card variants live under `src/templates/spellCard/`.
 Current variants:
 
 - `classic`: the default fixed spell-card layout;
-- `compact`: a fixed-size denser layout using the same data model.
+- `compact`: a fixed-size denser layout using the same data model;
+- `flow`: a fixed-size long-text-oriented layout using the same data model and a semantic description flow region.
 
 The local registry is:
 
@@ -115,6 +117,12 @@ src/templates/spellCard/variants.js
 ```
 
 `createSpellCardsJob()` accepts a `variantId` from code and defaults to `classic`.
+
+The flow variant can be selected from code with:
+
+```js
+createSpellCardsJob({ variantId: "flow" })
+```
 
 ## Spell-card theme tokens
 
@@ -140,7 +148,21 @@ render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow repor
 
 The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
 
-It does not resolve overflow. It does not implement shrink, blank-extra, continuation-card, or flow cards.
+It does not resolve overflow. It does not implement shrink, blank-extra, continuation-card, or automatic flow continuation.
+
+## Flow card variant
+
+The `flow` spell-card variant is a template variant, not a flow engine.
+
+It keeps the same physical card size, data model, theme token model, and `grid-pack` pagination as the other spell-card variants.
+
+It declares `overflow.strategy: "fail"` and marks the description area with:
+
+```html
+data-flow-region="description"
+```
+
+That semantic region is for future overflow policy and continuation work. It does not split text or create additional cards by itself.
 
 ## Inspector model
 
@@ -185,11 +207,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/flow-card-template-scope
+foundation/card-overflow-policy-scope
 ```
 
 Possible objective:
 
-Scope a minimal flow-oriented card template without implementing automatic continuation cards prematurely.
+Scope how declared overflow strategies such as `fail`, `clip`, `shrink`, `blank-extra`, and `continuation-card` should behave before implementing automatic resolution.
 
 Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
