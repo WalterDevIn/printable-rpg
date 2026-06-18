@@ -4,6 +4,9 @@ import { classicSpellCardStyles } from "./classic/styles.js";
 import { compactSpellCardManifest } from "./compact/manifest.js";
 import { compactSpellCardTemplate } from "./compact/template.js";
 import { compactSpellCardStyles } from "./compact/styles.js";
+import { flowSpellCardManifest } from "./flow/manifest.js";
+import { flowSpellCardTemplate } from "./flow/template.js";
+import { flowSpellCardStyles } from "./flow/styles.js";
 
 export const DEFAULT_SPELL_CARD_VARIANT_ID = "classic";
 
@@ -21,6 +24,13 @@ export const spellCardVariants = {
     manifest: compactSpellCardManifest,
     templateHtml: compactSpellCardTemplate,
     templateStyles: compactSpellCardStyles,
+  },
+  flow: {
+    id: "flow",
+    label: "Flow spell card",
+    manifest: flowSpellCardManifest,
+    templateHtml: flowSpellCardTemplate,
+    templateStyles: flowSpellCardStyles,
   },
 };
 
