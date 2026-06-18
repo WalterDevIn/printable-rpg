@@ -5,7 +5,7 @@ import { spellCardFlowRegions } from "../templates/spellCard/flowRegions.js";
 import { createSpellCardTemplateContext } from "../templates/spellCard/resolveSpellCardTheme.js";
 import { getSpellCardVariant } from "../templates/spellCard/variants.js";
 
-export function createSpellCardsJob({ variantId = "classic" } = {}) {
+export function createSpellCardsJob({ variantId } = {}) {
   const variant = getSpellCardVariant(variantId);
   const templateData = sampleSpells.map(createSpellCardTemplateContext);
   const printRecords = createSpellCardPrintRecords(templateData, spellCardFlowRegions, {
