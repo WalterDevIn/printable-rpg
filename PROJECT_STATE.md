@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 ## Current direction
 
@@ -27,6 +27,7 @@ The current app:
 - opens directly through `index.html`;
 - renders sample spell-card pages generated from JavaScript data;
 - applies spell-card visual theme tokens derived from spell school;
+- supports code-selected spell-card template variants;
 - shows a non-editable inspector for the active print job.
 
 ## Implemented foundation
@@ -38,6 +39,7 @@ foundation/template-print-pipeline-v1
 foundation/print-core-boundaries-v1
 foundation/print-job-inspector-v1
 foundation/card-template-tokens-v1
+foundation/card-template-variants-v1
 ```
 
 Completed behavior:
@@ -50,15 +52,18 @@ Completed behavior:
 - `composePages.js` is a composer dispatcher, not a universal layout function;
 - fixed card grid composition lives in `src/core/print/composeFixedGridPages.js`;
 - print document creation validates the manifest before creating blocks;
-- the spell-card template lives under `src/templates/spellCard/`;
-- the spell-card manifest uses the centralized A4 page size;
+- spell-card variants live under `src/templates/spellCard/`;
+- the default spell-card variant is `classic`;
+- an additional fixed-size `compact` spell-card variant exists;
+- the local spell-card variant registry lives in `src/templates/spellCard/variants.js`;
 - spell-card theme tokens live in `src/templates/spellCard/themeTokens.js`;
 - spell-card theme resolution lives in `src/templates/spellCard/resolveSpellCardTheme.js`;
 - spell-school mapping is template-specific and does not touch `src/core/`;
-- the spell-card template consumes theme tokens through placeholders;
+- spell-card templates consume theme tokens through placeholders;
 - spell-card styles use CSS custom properties for token application;
 - the concrete spell-card print job lives in `src/printJobs/spellCardsJob.js`;
-- `createSpellCardsJob()` returns a traceable job object with themed data, manifest, template HTML, template CSS, and printDocument;
+- `createSpellCardsJob()` accepts a `variantId` option from code and defaults to `classic`;
+- `createSpellCardsJob()` returns a traceable job object with variant metadata, themed data, manifest, template HTML, template CSS, and printDocument;
 - the non-editable job inspector lives under `src/app/`;
 - the inspector shows job summary, DataPack, template HTML, manifest, template CSS, and a PrintDocument summary without block HTML duplication;
 - DOM rendering of print pages lives in `src/render/renderPrintDocument.js`;
@@ -99,6 +104,7 @@ Current implementation separates:
 - page composition dispatch;
 - fixed-grid page composition;
 - A4 page size constants;
+- local template variants;
 - print document creation;
 - browser rendering;
 - print job orchestration;
@@ -124,6 +130,23 @@ The inspector is read-only.
 It exposes the active job inputs and generated document summary without making them editable.
 
 Data and templates remain code-authored modules for now.
+
+### Spell-card variants
+
+Spell-card variants are local to `src/templates/spellCard/`.
+
+The current local registry is:
+
+```text
+src/templates/spellCard/variants.js
+```
+
+Current variants:
+
+- `classic`: default fixed spell-card layout;
+- `compact`: fixed-size denser layout using the same data model.
+
+No global template registry exists yet.
 
 ### Spell-card theme tokens
 
@@ -184,23 +207,24 @@ The current foundation intentionally does not include:
 - random tables;
 - PDF export;
 - backend/API;
-- framework or build tooling.
+- framework or build tooling;
+- global template registry;
+- UI template selector.
 
 ## Next recommended scope
 
 Task name:
 
 ```text
-foundation/card-template-variants-v1
+foundation/card-overflow-detection-scope
 ```
 
 Possible closed objective:
 
-Add support for multiple card template variants from code-authored modules without adding user input, editor UI, overflow, or arbitrary template JavaScript.
+Scope basic overflow detection for fixed and flow-oriented card content without implementing continuation cards prematurely.
 
 Alternative next scopes:
 
-- `foundation/card-overflow-detection-scope`
 - `foundation/flow-card-template-scope`
 - `foundation/stackable-block-composer-scope`
 
@@ -213,10 +237,11 @@ Alternative next scopes:
 - Treating `grid-pack` as a universal page composer.
 - Turning the read-only inspector into an editor without a dedicated scope.
 - Moving template-specific theme mapping into `src/core/`.
+- Creating a global template registry before there are multiple template families.
 - Adding backend/API before the print pipeline needs persistence or sharing.
 
 ## Immediate status
 
-Phase 2 token work is partially implemented through `foundation/card-template-tokens-v1`.
+Phase 2 variant support is implemented through `foundation/card-template-variants-v1`.
 
-The app previews generated spell-card A4 pages from sample data, exposes active print job inputs through a read-only inspector, and applies spell-school visual tokens without changing the core pipeline.
+The app previews generated spell-card A4 pages from sample data using the default `classic` variant, exposes active print job inputs through a read-only inspector, and can select the `compact` variant from code without changing the core pipeline.
