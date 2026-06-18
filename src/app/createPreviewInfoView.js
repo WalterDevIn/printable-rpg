@@ -1,4 +1,5 @@
 import {
+  createFlowRegionsSummary,
   createOverflowPolicySummary,
   createOverflowSummary,
   createPrintDocumentSummary,
@@ -21,7 +22,7 @@ function createCodePanel(title, value) {
   return section;
 }
 
-function createPreviewSummary(job, overflowReport, overflowPolicyReport) {
+function createPreviewSummary(job, overflowReport, overflowPolicyReport, flowRegionsReport) {
   const list = document.createElement("dl");
   list.className = "view-summary-list";
 
@@ -31,6 +32,7 @@ function createPreviewSummary(job, overflowReport, overflowPolicyReport) {
     ["Overflow", overflowReport ? `${overflowReport.overflowingBlockCount}/${overflowReport.totalBlocks}` : "Not measured"],
     ["Policy", overflowPolicyReport ? overflowPolicyReport.status : "Not evaluated"],
     ["Strategy", overflowPolicyReport?.strategy ?? "none"],
+    ["Region candidates", flowRegionsReport ? flowRegionsReport.summary.flowCandidateCount : "Not evaluated"],
     ["Page", `${job.printDocument.page.size} ${job.printDocument.page.orientation} · ${job.printDocument.page.widthMm}×${job.printDocument.page.heightMm} mm`],
     ["Block size", `${job.manifest.size.widthMm}×${job.manifest.size.heightMm} mm`],
   ];
@@ -51,7 +53,7 @@ function createPreviewSummary(job, overflowReport, overflowPolicyReport) {
 }
 
 export function createPreviewInfoView(job, options = {}) {
-  const { overflowReport = null, overflowPolicyReport = null } = options;
+  const { overflowReport = null, overflowPolicyReport = null, flowRegionsReport = null } = options;
   const root = document.createElement("div");
   root.className = "preview-info-view";
 
@@ -67,15 +69,16 @@ export function createPreviewInfoView(job, options = {}) {
 
   const note = document.createElement("p");
   note.className = "view-note";
-  note.textContent = "Resumen no editable del documento generado, overflow medido y política declarada.";
+  note.textContent = "Resumen no editable del documento generado, overflow medido, política declarada y regiones.";
 
   header.append(eyebrow, title, note);
   root.append(
     header,
-    createPreviewSummary(job, overflowReport, overflowPolicyReport),
+    createPreviewSummary(job, overflowReport, overflowPolicyReport, flowRegionsReport),
     createCodePanel("PrintDocument summary", formatJson(createPrintDocumentSummary(job.printDocument))),
     createCodePanel("Overflow report", formatJson(createOverflowSummary(overflowReport))),
     createCodePanel("Overflow policy report", formatJson(createOverflowPolicySummary(overflowPolicyReport))),
+    createCodePanel("Flow regions report", formatJson(createFlowRegionsSummary(flowRegionsReport))),
   );
 
   return root;
