@@ -7,6 +7,8 @@
   --accent: #d99235;
   --danger: #d95f45;
   --paper: #ffffff;
+  --scroll-track: #15110e;
+  --scroll-thumb: #6f5132;
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -14,11 +16,42 @@
   box-sizing: border-box;
 }
 
+* {
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 2px solid var(--scroll-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  overflow: hidden;
   background: radial-gradient(circle at top, #2e251b 0, var(--bg) 48%, #0f0d0b 100%);
   color: var(--ink);
+}
+
+body.is-resizing-workspace {
+  cursor: col-resize;
+  user-select: none;
 }
 
 button {
@@ -30,32 +63,34 @@ button:not(:disabled) {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
 }
 
 .app-views-stage {
-  min-height: 100vh;
-  padding: 10px;
+  height: 100vh;
+  min-height: 0;
+  padding: 8px;
+  overflow: hidden;
 }
 
 .user-print-workspace {
   display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: calc(100vh - 20px);
-  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  gap: 8px;
 }
 
 .user-print-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 10px;
+  min-height: 42px;
+  padding: 6px 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(23, 20, 17, 0.96);
 }
 
@@ -76,8 +111,8 @@ button:not(:disabled) {
 
 .workspace-primary-label {
   color: var(--ink);
-  font-size: 0.95rem;
-  letter-spacing: 0.06em;
+  font-size: 0.86rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -85,9 +120,11 @@ button:not(:disabled) {
 .print-button {
   border: 1px solid #805119;
   border-radius: 999px;
-  padding: 7px 11px;
+  padding: 6px 10px;
   color: var(--ink);
   background: linear-gradient(180deg, #704c20, #4b351b);
+  font-size: 0.86rem;
+  line-height: 1;
 }
 
 .compact-action:disabled {
@@ -100,60 +137,83 @@ button:not(:disabled) {
 }
 
 .user-print-body {
+  --input-panel-width: 38%;
   display: grid;
-  grid-template-columns: minmax(320px, 0.85fr) minmax(520px, 1.45fr);
-  gap: 10px;
+  grid-template-columns: minmax(260px, var(--input-panel-width)) 8px minmax(360px, 1fr);
   min-height: 0;
+  overflow: hidden;
 }
 
 .user-workspace-panel {
+  min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 14px;
   background: rgba(36, 31, 26, 0.92);
 }
 
 .user-workspace-panel--input {
-  padding: 12px;
+  border-radius: 12px 0 0 12px;
 }
 
 .user-workspace-panel--preview {
-  padding: 12px;
+  border-radius: 0 12px 12px 0;
 }
 
-.panel-title {
-  margin: 0 0 10px;
-  color: var(--accent);
-  font-size: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.workspace-splitter {
+  position: relative;
+  cursor: col-resize;
+  background: rgba(23, 20, 17, 0.8);
+  border-block: 1px solid var(--line);
+}
+
+.workspace-splitter::before {
+  position: absolute;
+  inset: 12px 3px;
+  border-radius: 999px;
+  background: var(--line);
+  content: "";
+}
+
+.workspace-splitter:hover::before,
+.workspace-splitter:focus-visible::before {
+  background: var(--accent);
+}
+
+.workspace-splitter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.input-view,
+.print-output-view {
+  height: 100%;
+  min-height: 0;
 }
 
 .view-note {
-  margin: 0 0 10px;
+  margin: 0;
+  padding: 8px 10px;
   color: var(--muted);
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--line);
 }
 
 .input-data-panel {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(12, 10, 8, 0.55);
+  height: calc(100% - 35px);
+  min-height: 0;
+  background: rgba(12, 10, 8, 0.42);
 }
 
 .input-data-panel h3 {
-  margin: 0;
-  padding: 9px 10px;
-  color: var(--accent);
-  font-size: 0.9rem;
+  display: none;
 }
 
 .input-data-panel pre {
-  max-height: calc(100vh - 180px);
+  height: 100%;
   margin: 0;
   padding: 10px;
   overflow: auto;
-  border-top: 1px solid var(--line);
   color: #f9f0df;
   font-family: "Courier New", monospace;
   font-size: 0.78rem;
@@ -162,18 +222,18 @@ button:not(:disabled) {
 }
 
 .print-output-frame {
-  min-width: 230mm;
+  height: 100%;
+  min-width: 0;
   overflow: auto;
   padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(12, 10, 8, 0.55);
+  background: rgba(12, 10, 8, 0.42);
 }
 
 .print-preview {
   display: grid;
   gap: 24px;
   justify-content: center;
+  min-width: max-content;
 }
 
 .print-page {
@@ -197,12 +257,33 @@ button:not(:disabled) {
 }
 
 @media (max-width: 980px) {
-  .user-print-body {
-    grid-template-columns: 1fr;
+  body {
+    overflow: auto;
   }
 
-  .print-output-frame {
-    min-width: 0;
+  .app-shell,
+  .app-views-stage {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .user-print-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(280px, 42vh) 8px minmax(420px, 1fr);
+    overflow: visible;
+  }
+
+  .workspace-splitter {
+    cursor: row-resize;
+  }
+
+  .workspace-splitter::before {
+    inset: 3px 12px;
+  }
+
+  .user-workspace-panel--input,
+  .user-workspace-panel--preview {
+    border-radius: 12px;
   }
 }
 
@@ -213,12 +294,13 @@ button:not(:disabled) {
   }
 
   body {
+    overflow: visible;
     background: white;
   }
 
   .user-print-topbar,
   .user-workspace-panel--input,
-  .panel-title {
+  .workspace-splitter {
     display: none;
   }
 
@@ -230,6 +312,7 @@ button:not(:disabled) {
   .print-output-view,
   .print-output-frame {
     display: block;
+    height: auto;
     min-width: 0;
     min-height: 0;
     max-width: none;
@@ -244,6 +327,7 @@ button:not(:disabled) {
 
   .print-preview {
     display: block;
+    min-width: 0;
   }
 
   .print-page {
