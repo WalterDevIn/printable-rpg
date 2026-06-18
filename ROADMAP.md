@@ -47,6 +47,32 @@ Non-goals:
 - no PDF export;
 - no API.
 
+## Phase 1.5: Print job inspector
+
+Goal: make the current print job transparent without turning the app into an editor.
+
+The user should be able to see what feeds the generated preview.
+
+Deliverables:
+
+- visible current DataPack;
+- visible template HTML;
+- visible template manifest;
+- visible template CSS;
+- visible PrintDocument summary;
+- visible page count and block count.
+
+Non-goals:
+
+- no data editing;
+- no template editing;
+- no file loading;
+- no persistence;
+- no import/export;
+- no visual template editor.
+
+This phase prevents the print pipeline from becoming a black box while keeping programmer-authored files as the source of truth.
+
 ## Phase 2: Template tokens and card variants
 
 Goal: improve cards without changing the core pipeline.
@@ -76,6 +102,30 @@ Initial strategies:
 - `continuation-card`.
 
 Start with flow cards before solving every template family.
+
+## Phase 3.5: Explicit data input
+
+Goal: allow user-provided data after the print pipeline, card variants, and basic overflow model are stable enough to define meaningful input contracts.
+
+The first explicit user input should be data, not template editing.
+
+Deliverables:
+
+- paste or load JSON data for an existing template family;
+- validate basic JSON shape;
+- report useful data errors;
+- regenerate the current print job from user-provided data;
+- keep existing code-authored sample data as a fallback.
+
+Non-goals:
+
+- no visual template editor;
+- no full template editing;
+- no arbitrary JavaScript input;
+- no persistence unless separately scoped;
+- no backend/API.
+
+This phase converts DataPack input from programmer-authored files into controlled user input while preserving existing templates as stable code modules.
 
 ## Phase 4: Stackable DM and NPC blocks
 
