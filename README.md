@@ -10,9 +10,9 @@ DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser P
 
 ## Current app
 
-The current app is a minimal print-preview implementation for spell cards.
+The current app is a minimal print-preview implementation for spell cards with a non-editable print job inspector.
 
-It renders sample spell data through a reusable card template, creates fixed-size physical PrintBlocks, arranges them into A4 pages, and supports browser printing.
+It renders sample spell data through a reusable card template, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated preview.
 
 The app is frontend-only: HTML, CSS, and JavaScript ESM.
 
@@ -27,6 +27,7 @@ Implemented tasks:
 ```text
 foundation/template-print-pipeline-v1
 foundation/print-core-boundaries-v1
+foundation/print-job-inspector-v1
 ```
 
 Current behavior:
@@ -38,12 +39,17 @@ Current behavior:
 - arranges cards automatically into A4 pages with the explicit `grid-pack` composer;
 - creates additional A4 pages when needed;
 - renders a browser preview;
+- shows a non-editable inspector for the current print job;
+- shows data, template HTML, manifest, template CSS, and PrintDocument summary;
 - provides an `Imprimir` button using `window.print()`;
-- hides controls in print mode and prints only the pages.
+- hides controls and inspector in print mode and prints only the pages.
 
 ## Main directories
 
 ```text
+src/app/
+  application-level inspector utilities
+
 src/data/
   sample content objects
 
@@ -60,7 +66,7 @@ src/templates/
   reusable physical templates
 
 src/printJobs/
-  concrete print requests
+  concrete print requests and traceable job objects
 
 src/render/
   browser DOM rendering for print documents
@@ -77,6 +83,20 @@ The A4 page size is centralized in `src/core/layout/pageSizes.js`.
 The current page composition strategy is explicitly `grid-pack`, implemented by `composeFixedGridPages`. Future composers, such as vertical stack composition, should be added as separate strategies instead of expanding fixed-grid logic.
 
 Cards are not required to follow the internal 5 mm grid. Character sheets, DM stackblocks, NPC blocks, and random tables should use the 5 mm grid internally in later phases.
+
+## Inspector model
+
+The inspector is read-only.
+
+It shows what feeds the current preview:
+
+- DataPack;
+- template HTML;
+- template manifest;
+- template CSS;
+- PrintDocument summary.
+
+It does not allow editing, file loading, persistence, import/export, or template authoring.
 
 ## Documentation
 
@@ -106,11 +126,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/print-job-inspector-v1
+foundation/card-template-tokens-v1
 ```
 
 Possible objective:
 
-Show the current data, template HTML, manifest, template CSS, page count, block count, and PrintDocument summary without adding editing or input features.
+Add semantic visual tokens for spell schools without hardcoding spell-specific behavior into the generic print engine.
 
 Do not add overflow, character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
