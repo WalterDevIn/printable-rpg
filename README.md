@@ -10,9 +10,30 @@ DataPack -> Template -> PrintRecord -> PrintBlock -> PageComposer -> PrintDocume
 
 ## Current app
 
-The current app is a minimal read-only workspace implementation for spell cards with four simultaneous views: Data, Template, Diagnostics, and Print Output.
+The current app is a minimal read-only user print workspace for spell cards.
 
-It renders sample spell data through reusable card template variants, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated output.
+The main user-facing flow is now:
+
+```text
+Input -> Preview -> Print
+```
+
+The template is selected, then stays out of the user's main workspace. Template code, manifest, CSS, and technical diagnostics are not shown in the primary user flow.
+
+The compact top bar contains:
+
+- an Input label;
+- a disabled input-mode selector placeholder, currently `JSON`;
+- a disabled template selector placeholder, currently the active spell-card template;
+- a Preview label;
+- an `Imprimir` button.
+
+The main screen has two zones:
+
+- Input: current sample JSON data, read-only until explicit data input is implemented;
+- Preview: generated A4 print output.
+
+It renders sample spell data through reusable card template variants, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the printable result without requiring the user to inspect template internals.
 
 Spell cards receive semantic visual tokens derived from their spell school. The mapping lives inside the `spellCard` template area, not in the generic print core.
 
@@ -20,11 +41,7 @@ Spell cards also support code-selected template variants. The default variant is
 
 Phase 3 is closed. It established the overflow and flow foundation: overflow detection, overflow policy diagnostics, flow regions, PrintRecords, and mixed spell-card PrintDocuments.
 
-Rendered PrintBlocks are measured in the browser for overflow after the preview is rendered. The report is diagnostic only: it does not shrink, split, continue, or otherwise resolve content by measurement.
-
-The declared overflow strategy is evaluated diagnostically against the measured overflow report. This produces an Overflow policy report; it does not block printing or resolve overflow.
-
-Spell-card flow regions are modeled locally and reported diagnostically. Flow candidates generate PrintRecords and a mixed PrintDocument with `classic` head records and `flow` continuation records by data estimate.
+Rendered PrintBlocks are still measured in the browser for overflow after the preview is rendered. The report is diagnostic only and is no longer part of the primary user workspace.
 
 Continuation is estimated from source data. It is not DOM-measured and is not layout-perfect.
 
@@ -52,6 +69,7 @@ foundation/card-overflow-policy-v1
 foundation/template-flow-regions-v1
 foundation/mixed-card-print-document-v1
 foundation/phase-3-closeout-v1
+foundation/user-print-workspace-redesign-v1
 ```
 
 Current behavior:
@@ -72,21 +90,19 @@ Current behavior:
 - creates additional A4 pages when needed;
 - renders a browser print output;
 - measures rendered PrintBlocks for visual overflow;
-- evaluates the declared overflow strategy against the measured overflow report;
+- keeps overflow measurement diagnostic-only;
 - evaluates spell-card flow regions by data estimate, not DOM measurement;
-- separates read-only inspection into Data, Template, Diagnostics, and Print Output views;
-- Data shows source data and generated PrintRecords;
-- Template shows variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics shows PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
-- Print Output contains the real A4 output used for printing;
+- shows a compact user-facing Input/Preview workspace;
+- Input shows current sample JSON data read-only;
+- Preview contains the real A4 output used for printing;
 - provides an `Imprimir` button using `window.print()`;
-- hides controls, workspace panels except Print Output, diagnostic UI, and overflow marks in print mode.
+- hides input controls and non-print UI in print mode.
 
 ## Main directories
 
 ```text
 src/app/
-  read-only workspace views, controls, overflow policy diagnostics, and inspector utilities
+  user print workspace, input/preview views, selector placeholders, and technical utilities
 
 src/data/
   sample content objects
@@ -110,6 +126,27 @@ src/render/
   browser DOM rendering and rendered overflow measurement for print documents
 ```
 
+## User workspace direction
+
+The main user workspace is not a template editor.
+
+The user should:
+
+```text
+choose input mode -> choose template -> provide data -> preview output -> print
+```
+
+The template should be selected, not inspected, during normal printing.
+
+Template editing belongs in a future Template Studio, not in the main print workflow.
+
+Current selector buttons are non-functional placeholders:
+
+- `JSON` input mode;
+- current spell-card template selector.
+
+They prepare the UI for Phase 3.5 and later template selection without implementing those features yet.
+
 ## Phase 3 closed status
 
 Phase 3 established the overflow and flow architecture for card templates.
@@ -125,9 +162,7 @@ Completed in Phase 3:
 - `description` as the first flow region;
 - flow candidate detection by data estimate;
 - PrintRecords as an intermediate representation;
-- mixed spell-card PrintDocuments with `classic` head cards and `flow` continuation cards;
-- diagnostics for PrintDocument, PrintRecords, Overflow, Overflow policy, and Flow regions;
-- read-only four-view workspace.
+- mixed spell-card PrintDocuments with `classic` head cards and `flow` continuation cards.
 
 Not completed in Phase 3:
 
@@ -220,25 +255,10 @@ Overflow detection is browser-side and diagnostic.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy -> Diagnostics reports
+render PrintDocument -> measure rendered PrintBlocks -> evaluate manifest overflow strategy
 ```
 
-The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
-
-The policy evaluator reads `manifest.overflow.strategy` and produces an Overflow policy report.
-
-Implemented diagnostic strategies:
-
-- `fail`: overflow produces `error`; no overflow produces `ok`;
-- `clip`: overflow produces `warning`; no overflow produces `ok`.
-
-Recognized but unresolved strategies:
-
-- `shrink`;
-- `blank-extra`;
-- `continuation-card`.
-
-Unknown or absent strategies produce an explicit diagnostic status.
+The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels internally.
 
 Overflow policy diagnostics do not resolve overflow. They do not implement shrink, blank-extra, DOM-measured continuation, automatic flow continuation by measurement, or print blocking.
 
@@ -275,19 +295,6 @@ data-flow-region="description"
 
 That semantic region supports estimated continuation work, but the variant does not split text by itself.
 
-## Four-view workspace
-
-The app shell is read-only and split into four workspace views:
-
-- Data: source data and generated PrintRecords;
-- Template: active variant metadata, manifest, template HTML, and template CSS;
-- Diagnostics: PrintDocument summary, PrintRecords report, Overflow report, Overflow policy report, and Flow regions report;
-- Print Output: generated A4 pages used by browser print.
-
-The workspace buttons show or hide panels independently, so multiple views can be visible at once. Panels can be resized locally in the browser.
-
-The workspace does not edit data, edit templates, load files, select variants, persist layout, or create duplicate panel instances.
-
 ## Documentation
 
 Read these files before implementation work:
@@ -316,11 +323,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next step:
 
 ```text
-foundation/phase-4-direction-scope
+foundation/explicit-data-input-v1
 ```
 
 Possible objective:
 
-Choose whether Phase 4 should focus on DOM-measured fragmentation, another template family, controlled data input, or workspace evolution.
+Turn the left Input panel into a real controlled JSON input for the current template family.
 
-Do not add character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
+Do not add character sheets, stackblocks, random tables, backend, or a visual template editor until separately scoped.
