@@ -22,18 +22,20 @@ Open `index.html` in the browser.
 
 ## Current implemented slice
 
-Implemented task:
+Implemented tasks:
 
 ```text
 foundation/template-print-pipeline-v1
+foundation/print-core-boundaries-v1
 ```
 
 Current behavior:
 
 - loads sample spell objects from `src/data/sampleSpells.js`;
 - renders each spell with a template using placeholder variables;
+- validates the template manifest before creating print blocks;
 - creates fixed-size spell-card PrintBlocks from template manifest dimensions;
-- arranges cards automatically into A4 pages;
+- arranges cards automatically into A4 pages with the explicit `grid-pack` composer;
 - creates additional A4 pages when needed;
 - renders a browser preview;
 - provides an `Imprimir` button using `window.print()`;
@@ -45,11 +47,14 @@ Current behavior:
 src/data/
   sample content objects
 
+src/core/layout/
+  physical page sizes
+
 src/core/template/
-  placeholder rendering utilities
+  placeholder rendering utilities and template manifest validation
 
 src/core/print/
-  print blocks, page composition, and print document creation
+  print blocks, page composition dispatch, fixed-grid composition, and print document creation
 
 src/templates/
   reusable physical templates
@@ -66,6 +71,10 @@ src/render/
 The first template is `spellCard`.
 
 Its manifest defines physical card size and A4 pagination rules.
+
+The A4 page size is centralized in `src/core/layout/pageSizes.js`.
+
+The current page composition strategy is explicitly `grid-pack`, implemented by `composeFixedGridPages`. Future composers, such as vertical stack composition, should be added as separate strategies instead of expanding fixed-grid logic.
 
 Cards are not required to follow the internal 5 mm grid. Character sheets, DM stackblocks, NPC blocks, and random tables should use the 5 mm grid internally in later phases.
 
@@ -97,11 +106,11 @@ See `TWO_STEP_AI_DEVELOPMENT.md`.
 Recommended next phase:
 
 ```text
-foundation/card-template-tokens-v1
+foundation/print-job-inspector-v1
 ```
 
 Possible objective:
 
-Add semantic visual tokens for spell schools without hardcoding spell-specific behavior into the generic print engine.
+Show the current data, template HTML, manifest, template CSS, page count, block count, and PrintDocument summary without adding editing or input features.
 
 Do not add overflow, character sheets, stackblocks, random tables, backend, or a visual editor until separately scoped.
