@@ -10,7 +10,7 @@ DataPack -> Template -> PrintBlock -> PageComposer -> PrintDocument -> Browser P
 
 ## Current app
 
-The current app is a minimal print-preview implementation for spell cards with a non-editable print job inspector.
+The current app is a minimal read-only three-view implementation for spell cards: Data, Template, and Preview.
 
 It renders sample spell data through a reusable card template variant, creates fixed-size physical PrintBlocks, arranges them into A4 pages, supports browser printing, and exposes the inputs that feed the generated preview.
 
@@ -38,6 +38,7 @@ foundation/card-template-tokens-v1
 foundation/card-template-variants-v1
 foundation/card-overflow-detection-v1
 foundation/flow-card-template-v1
+foundation/three-view-app-shell-v1
 ```
 
 Current behavior:
@@ -55,16 +56,18 @@ Current behavior:
 - creates additional A4 pages when needed;
 - renders a browser preview;
 - measures rendered PrintBlocks for visual overflow;
-- shows a non-editable inspector for the current print job;
-- shows data, template HTML, manifest, template CSS, PrintDocument summary, and Overflow report;
+- separates read-only inspection into Data, Template, and Preview tabs;
+- Data shows the current enriched job data;
+- Template shows variant metadata, manifest, template HTML, and template CSS;
+- Preview shows PrintDocument summary, Overflow report, and the rendered A4 pages below the tabs;
 - provides an `Imprimir` button using `window.print()`;
-- hides controls, inspector, and diagnostic overflow marks in print mode.
+- hides controls, tabs, diagnostic panels, and overflow marks in print mode.
 
 ## Main directories
 
 ```text
 src/app/
-  application-level inspector utilities
+  read-only app shell views, tabs, and inspector utilities
 
 src/data/
   sample content objects
@@ -143,7 +146,7 @@ Overflow detection is browser-side and diagnostic.
 The current flow is:
 
 ```text
-render PrintDocument -> measure rendered PrintBlocks -> inspector Overflow report
+render PrintDocument -> measure rendered PrintBlocks -> Preview tab Overflow report
 ```
 
 The detector reports total blocks, overflowing blocks, page number, block id, template id, and approximate vertical/horizontal overflow in pixels.
@@ -164,20 +167,15 @@ data-flow-region="description"
 
 That semantic region is for future overflow policy and continuation work. It does not split text or create additional cards by itself.
 
-## Inspector model
+## Three-view app shell
 
-The inspector is read-only.
+The app shell is read-only and split into three tabs:
 
-It shows what feeds the current preview:
+- Data: current enriched job data;
+- Template: active variant metadata, manifest, template HTML, and template CSS;
+- Preview: PrintDocument summary, Overflow report, and generated A4 pages.
 
-- DataPack;
-- template HTML;
-- template manifest;
-- template CSS;
-- PrintDocument summary;
-- Overflow report.
-
-It does not allow editing, file loading, persistence, import/export, or template authoring.
+The tabs do not edit data, do not edit templates, do not load files, and do not select variants.
 
 ## Documentation
 
