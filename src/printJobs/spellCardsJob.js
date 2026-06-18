@@ -10,6 +10,7 @@ export function createSpellCardsJob({ variantId = "classic" } = {}) {
   const templateData = sampleSpells.map(createSpellCardTemplateContext);
   const printRecords = createSpellCardPrintRecords(templateData, spellCardFlowRegions, {
     baseVariantId: variant.id,
+    continuationVariantId: variant.continuationVariantId,
   });
   const printDocument = createMixedPrintDocument({
     records: printRecords,
