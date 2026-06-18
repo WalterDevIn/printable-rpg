@@ -109,4 +109,15 @@ export const sampleSpells = [
     description:
       "A wave of thunderous force sweeps out from you. Each creature in the area must endure the force or be pushed away from you.",
   },
+  {
+    name: "Cathedral of Thorns",
+    level: "4th",
+    school: "Conjuration",
+    castingTime: "1 action",
+    range: "90 feet",
+    components: "V, S, M",
+    duration: "Concentration, up to 1 minute",
+    description:
+      "You call up a winding cathedral of black roots, thorned arches, and flowering brambles in a space you can see within range. The area becomes difficult terrain as the roots knot across the ground and climb over nearby surfaces. When a creature enters the area for the first time on a turn or starts its turn there, it must push through the living thorns. The creature takes piercing damage and its speed is reduced until the start of its next turn. A creature can use its action to cut or tear open a narrow passage, but the passage begins closing as soon as the creature moves away. The cathedral lightly obscures creatures inside it, and ranged attacks that pass through more than one wall of thorns suffer interference from the shifting branches. If you move more than 120 feet away from the cathedral, the roots lose cohesion and collapse into harmless leaves and splinters. At the end of the spell, the conjured growth withers instantly, leaving behind only scattered petals, broken twigs, and faint marks in the soil.",
+  },
 ];
